@@ -21,13 +21,11 @@ public class LiquidacionRestController {
 	
 	@PostMapping("/liquidaciones")
 	public Liquidacion save(@RequestBody Liquidacion liquidacion) {
-		
 		return this.liquidacionService.save(liquidacion);
 	}
 	
 	@GetMapping("/liquidaciones")
 	public List<Liquidacion> findAll(){
-		
 		return this.liquidacionService.findAll();
 	}
 	

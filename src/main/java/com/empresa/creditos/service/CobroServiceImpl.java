@@ -27,16 +27,16 @@ public class CobroServiceImpl implements ICobroService {
 		List<Cobro> cobros = this.cobroDao.findAll();
 
 		for (Cobro cobro : cobros) {
-			
+
 			try {
 				cobro.getTotal();
 			} catch (NullPointerException e) {
 				cobro.setTotal(0);
 			}
-			
+
 			List<Credito> creditos = cobro.getCreditos();
-			
-			for(Credito credito:creditos) {
+
+			for (Credito credito : creditos) {
 				try {
 					credito.getTotalAbonos();
 				} catch (Exception e) {
@@ -44,19 +44,26 @@ public class CobroServiceImpl implements ICobroService {
 				}
 			}
 		}
-	
+
 		return cobros;
 	}
 
 	@Override
 	public Cobro findById(int id) {
 
-		return this.cobroDao.findById(id);
+		Cobro cobro = this.cobroDao.findById(id);
+
+		try {
+			cobro.getTotal();
+		} catch (NullPointerException e) {
+			cobro.setTotal(0);
+		}
+
+		return cobro;
 	}
 
 	@Override
 	public Cobro findByIdWithLiquidaciones(int id) {
-
 		return this.cobroDao.findByIdWithLiquidaciones(id);
 	}
 
