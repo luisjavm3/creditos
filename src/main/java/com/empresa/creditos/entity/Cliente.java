@@ -8,6 +8,7 @@ import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -44,7 +45,6 @@ public class Cliente implements Serializable {
 	private int id;
 
 	@NaturalId
-	@Column(updatable = false, nullable = false)
 	private int cedula;
 
 	@Column(nullable = false)
@@ -56,30 +56,59 @@ public class Cliente implements Serializable {
 	@Column
 	private String apodo;
 
-//	#####
+	// #####
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cobro_id", referencedColumnName = "id", nullable = false)
-	@JsonIgnoreProperties(value = { "clientes", "liquidaciones", "creditos" })
+	@JsonIgnoreProperties(value = { "clientes", "liquidaciones", "creditos", "hibernateLazyInitializer" })
 	private Cobro cobro;
 
-	@OneToOne(mappedBy = "cliente")
+	@OneToOne(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@JsonIgnoreProperties(value = { "cobro", "cliente" })
 	private Credito credito;
 
-	@OneToOne
+	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	@JoinColumn(name = "direccion_id", referencedColumnName = "id", nullable = false)
+	@JsonIgnoreProperties(value = { "hibernateLazyInitializer" })
 	private Direccion direccion;
 
 	@OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnoreProperties(value = { "cliente" })
 	private List<TelefonoCliente> telefonos = new ArrayList<TelefonoCliente>();
 
-//	########################################################################################
+	// ########################### Helper Methods #####################
+
+	public void setCredito(Credito cr) {
+		if (cr == null) {
+			if (this.credito != null) {
+				this.credito.setCliente(null);
+			}
+		} else {
+			cr.setCliente(this);
+		}
+		this.credito = cr;
+	}
+
+	public Credito getCredito() {
+		return credito;
+	}
+
+	public void addTelefono(TelefonoCliente t) {
+		t.setCliente(this);
+		this.telefonos.add(t);
+	}
+
+	public void removeTelefono(TelefonoCliente t) {
+		t.setCliente(null);
+		this.telefonos.remove(t);
+	}
+
+	// #############################
 
 	public void setDireccion(Direccion direccion) {
 		this.direccion = direccion;
 	}
-	
+
 	public Direccion getDireccion() {
 		return direccion;
 	}
@@ -92,21 +121,13 @@ public class Cliente implements Serializable {
 		this.telefonos = telefonos;
 	}
 
-	public Credito getCredito() {
-		return credito;
-	}
-
-	public void setCredito(Credito credito) {
-		this.credito = credito;
-	}
-
 	public Cobro getCobro() {
 		return cobro;
 	}
 
 	public void setCobro(Cobro cobro) {
 		this.cobro = cobro;
-//		cobro.addCliente(this);
+		// cobro.addCliente(this);
 	}
 
 	public int getId() {
@@ -147,30 +168,6 @@ public class Cliente implements Serializable {
 
 	public void setApodo(String apodo) {
 		this.apodo = apodo;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-
-		if (this == o)
-			return true;
-
-		if (!(o instanceof Cliente) || o == null)
-			return false;
-
-		Cliente that = (Cliente) o;
-		
-		return Objects.equals(that.cedula, cedula);
-	}
-	
-	@Override
-	public int hashCode() {
-		return Objects.hash(cedula);
-	}
-	
-	@Override
-	public String toString() {
-		return ""+id+" "+nombres;
 	}
 
 	private static final long serialVersionUID = 1L;

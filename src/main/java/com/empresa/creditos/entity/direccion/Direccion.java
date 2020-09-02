@@ -18,38 +18,41 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name = "direcciones")
 public class Direccion implements Serializable {
 
-	public Direccion() {}
-	
-	public Direccion(Departamento departamento, Municipio municipio, Barrio barrio, String direccion) {
-		this.departamento=departamento;
-		this.municipio=municipio;
-		this.barrio=barrio;
-		this.direccion=direccion;
+	public Direccion() {
 	}
-	
+
+	public Direccion(Departamento departamento, Municipio municipio, Barrio barrio, String direccion) {
+		this.departamento = departamento;
+		this.municipio = municipio;
+		this.barrio = barrio;
+		this.direccion = direccion;
+	}
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "departamento_id", nullable = false)
-	@JsonIgnoreProperties(value = { "hibernateLazyInitializer", "handler", "municipios" })
+	@JsonIgnoreProperties(value = { "municipios", "hibernateLazyInitializer" })
 	private Departamento departamento;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "municipio_id", nullable = false)
-	@JsonIgnoreProperties(value = { "departamento", "barrios", "hibernateLazyInitializer", "handler" })
+	@JsonIgnoreProperties(value = { "departamento", "barrios", "hibernateLazyInitializer" })
 	private Municipio municipio;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "barrio_id", nullable = true)
-	@JsonIgnoreProperties(value = { "municipio", "hibernateLazyInitializer", "handler" })
+	@JsonIgnoreProperties(value = { "municipio", "hibernateLazyInitializer" })
 	private Barrio barrio;
 
 	@Column(nullable = false)
 	private String direccion;
 
-//	##########
+	// ################# Helper Methods #################
+
+	// #################### Getters and Setters ############
 
 	public int getId() {
 		return id;

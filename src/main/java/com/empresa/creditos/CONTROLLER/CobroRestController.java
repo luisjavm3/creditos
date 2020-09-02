@@ -1,4 +1,4 @@
-package com.empresa.creditos.CONTROLLER;
+package com.empresa.creditos.controller;
 
 import java.util.List;
 

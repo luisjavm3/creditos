@@ -6,8 +6,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -29,7 +31,6 @@ import com.empresa.creditos.entity.Cobro;
 import com.empresa.creditos.entity.liquidacion.Abono;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-//@Table(name = "creditos", uniqueConstraints = { @UniqueConstraint(columnNames = { "posicion_ruta","cobro_id" }) })
 @Entity
 @Table(name = "creditos")
 @Where(clause = "cancelado = false")
@@ -53,83 +54,112 @@ public class Credito implements Serializable {
 	private int id;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "fecha_prestamo")
+	@Column(name = "fecha_prestamo", nullable = false)
 	private Date fechaCredito;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "fecha_cancelado", nullable = true)
+	@Column(name = "fecha_cancelado")
 	private Date fechaCancelado;
 
 	@Column(nullable = false)
 	private int credito;
 
-	@Column(name = "posicion_ruta", nullable = false)
+	@Column(name = "posicion_ruta")
 	private int posicionEnRuta;
 
 	private boolean cancelado;
 
-	@Column
 	private float cuota;
 
-	@Formula(value = "select sum(a.abono) from abonos a where id = a.credito_id")
+	@Formula(value = "SELECT SUM(a.abono) FROM abonos a WHERE a.credito_id = id")
 	private Integer totalAbonos;
 
-//	@Formula(value = "SELECT sum(a.abono) FROM abonos a WHERE a.credito_id = id")
-	private int saldo;
+	// @Formula(value = "SELECT sum(a.abono) FROM abonos a WHERE a.credito_id = id")
+	// private Integer saldo;
 
-	@Column(nullable = true)
 	private int boleta;
 
-	@Column
 	private int total;
 
-//	#####
+	// #####
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cobro_id", nullable = false)
+	@JsonIgnoreProperties(value = { "creditos", "cobrador", "clientes", "liquidaciones", "hibernateLazyInitializer" })
 	private Cobro cobro;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cliente_id", referencedColumnName = "id", nullable = false)
+	@JsonIgnoreProperties(value = { "cobro", "credito", "hibernateLazyInitializer" })
 	private Cliente cliente;
 
-	@OneToMany(mappedBy = "credito")
+	@OneToMany(mappedBy = "credito", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnoreProperties(value = { "id", "credito" })
 	private List<Abono> abonos = new ArrayList<Abono>();
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cobrador_id", nullable = false)
+	@JsonIgnoreProperties(value = { "cobro", "creditos", "hibernateLazyInitializer" })
 	private Cobrador cobrador;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "interes_id", nullable = false)
+	@JsonIgnoreProperties(value = { "hibernateLazyInitializer" })
 	private Interes interes;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "perioricidad_id", nullable = false)
+	@JsonIgnoreProperties(value = { "hibernateLazyInitializer" })
 	private Perioricidad perioricidad;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "plazo_id", nullable = false)
+	@JsonIgnoreProperties(value = { "hibernateLazyInitializer" })
 	private Plazo plazo;
 
-//	##########
+	// ############## Entity's Life Cycle ###############
 
 	@PrePersist
 	public void asignarValoresAutomaticamente() {
-
 		this.fechaCredito = new Date();
 		this.fechaCancelado = null;
 		this.cancelado = false;
 		this.total = this.credito * (100 + this.interes.getInteres()) / 100;
-		this.saldo = total;
+		// this.saldo = total;
 		this.cuota = this.total / this.plazo.getPlazo();
 	}
 
-//	###############
+	// ############### Helper Methods #################
+
+	public void addAbono(Abono a) {
+		a.setCredito(this);
+		this.abonos.add(a);
+	}
+
+	public void removeAbono(Abono a) {
+		a.setCredito(null);
+		this.abonos.remove(a);
+	}
+
+	// ################# Getters and Setters #################
+
+	public void setCobrador(Cobrador c) {
+		// c.getCreditos().add(this);
+		this.cobrador = c;
+	}
+
+	public Cobrador getCobrador() {
+		return cobrador;
+	}
 
 	public int getTotalAbonos() {
+		if (this.totalAbonos == null)
+			return 0;
 		return totalAbonos;
+	}
+
+	public void setTotalAbonos(Integer totalAbonos) {
+		this.totalAbonos = totalAbonos;
 	}
 
 	public List<Abono> getAbonos() {
@@ -138,10 +168,6 @@ public class Credito implements Serializable {
 
 	public void setAbonos(List<Abono> abonos) {
 		this.abonos = abonos;
-	}
-
-	public void setTotalAbonos(Integer totalAbonos) {
-		this.totalAbonos = totalAbonos;
 	}
 
 	public boolean isCancelado() {
@@ -200,14 +226,6 @@ public class Credito implements Serializable {
 		this.cuota = cuota;
 	}
 
-	public int getSaldo() {
-		return saldo;
-	}
-
-	public void setSaldo(int saldo) {
-		this.saldo = saldo;
-	}
-
 	public int getBoleta() {
 		return boleta;
 	}
@@ -240,14 +258,6 @@ public class Credito implements Serializable {
 		this.cobro = cobro;
 	}
 
-	public Cobrador getCobrador() {
-		return cobrador;
-	}
-
-	public void setCobrador(Cobrador cobrador) {
-		this.cobrador = cobrador;
-	}
-
 	public Interes getInteres() {
 		return interes;
 	}
@@ -272,31 +282,13 @@ public class Credito implements Serializable {
 		this.plazo = plazo;
 	}
 
-	@Override
-	public boolean equals(Object o) {
+	// public Integer getSaldo() {
+	// return saldo;
+	// }
 
-		if (this == o)
-			return true;
-
-		if (!(o instanceof Credito) || o == null)
-			return false;
-
-		Credito that = (Credito) o;
-
-		return Objects.equals(that.id, id);
-	}
-
-	@Override
-	public int hashCode() {
-		return 41;
-	}
-
-	@Override
-	public String toString() {
-
-		return "ID: " + id + " CLIENTE: " + cliente.getNombres();
-
-	}
+	// public void setSaldo(Integer saldo) {
+	// this.saldo = saldo;
+	// }
 
 	private static final long serialVersionUID = 1L;
 }

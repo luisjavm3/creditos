@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -49,36 +50,49 @@ public class Cobrador implements Serializable {
 	@Column(nullable = false)
 	private String apellidos;
 
-	@Column
 	private String apodo;
 
-//	#####
+	// #####
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cobro_id", referencedColumnName = "id")
-	@JsonIgnoreProperties(value = {"cobrador"})
+	@JsonIgnoreProperties(value = { "cobrador", "clientes", "creditos", "liquidaciones", "hibernateLazyInitializer" })
 	private Cobro cobro;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "direccion_id", nullable = false)
+	@JsonIgnoreProperties(value = { "hibernateLazyInitializer" })
 	private Direccion direccion;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "cobrador")
+	@OneToMany(mappedBy = "cobrador", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnoreProperties(value = { "cobrador" })
 	private List<TelefonoCobrador> telefonos = new ArrayList<TelefonoCobrador>();
 
 	@OneToMany(mappedBy = "cobrador")
+	@JsonIgnoreProperties(value = { "cobro", "abonos", "cobrador" })
 	private List<Credito> creditos = new ArrayList<Credito>();
 
-//	##########
+	// ##################### Helper Methods ###########################
+
+	public void setDireccion(Direccion d) {
+		this.direccion = d;
+	}
 
 	public Direccion getDireccion() {
 		return direccion;
 	}
 
-	public void setDireccion(Direccion direccion) {
-		this.direccion = direccion;
+	public void addTelefono(TelefonoCobrador t) {
+		this.telefonos.add(t);
+		t.setCobrador(this);
 	}
+
+	public void removeTelefono(TelefonoCobrador t) {
+		this.telefonos.remove(t);
+		t.setCobrador(null);
+	}
+
+	// ############################################
 
 	public List<TelefonoCobrador> getTelefonos() {
 		return telefonos;
@@ -143,25 +157,6 @@ public class Cobrador implements Serializable {
 	public void setApodo(String apodo) {
 		this.apodo = apodo;
 	}
-
-//	@Override
-//	public boolean equals(Object o) {
-//
-//		if (o == this)
-//			return true;
-//
-//		if (!(o instanceof Cobrador) || o == null)
-//			return false;
-//
-//		Cobrador that = (Cobrador) o;
-//		
-//		return Objects.equals(that.id, id);
-//	}
-//	
-//	@Override
-//	public int hashCode() {
-//		return 31;
-//	}
 
 	private static final long serialVersionUID = 1L;
 }

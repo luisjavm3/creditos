@@ -6,9 +6,9 @@ import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 import com.empresa.creditos.entity.credito.Credito;
@@ -35,25 +35,28 @@ public class Abono implements Serializable {
 	@EmbeddedId
 	private AbonoId id = new AbonoId();
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@MapsId("liquidacionId")
-	@JsonIgnoreProperties(value = { "creditos" })
+	@JsonIgnoreProperties(value = { "cobro", "abonos", "hibernateLazyInitializer" })
 	private Liquidacion liquidacion;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@MapsId("creditoId")
-	@JsonIgnoreProperties(value = { "liquidaciones" })
+	@JsonIgnoreProperties(value = { "cobro", "cliente", "abonos", "cobrador", "hibernateLazyInitializer" })
 	private Credito credito;
 
 	@Column(nullable = false)
 	private int abono;
 
-//	##########
+	// ############# Entity's life cycle #################
 
-	@PrePersist
-	public void prePersist() {
-		this.credito.setSaldo(this.credito.getSaldo() - abono);
-	}
+	// @PrePersist
+	// public void prePersist() {
+	// }
+
+	// ############## Helper Methods ####################
+
+	// ################# Getters and Setters ################
 
 	public AbonoId getId() {
 		return id;
@@ -103,7 +106,6 @@ public class Abono implements Serializable {
 
 	@Override
 	public int hashCode() {
-
 		return Objects.hash(liquidacion, credito);
 	}
 

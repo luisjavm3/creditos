@@ -27,12 +27,25 @@ public class Departamento implements Serializable {
 	private int id;
 
 	@NaturalId
-	@Column(nullable = false, unique = true)
 	private String nombre;
 
-	@OneToMany(mappedBy = "departamento", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "departamento", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnoreProperties(value = { "departamento" })
 	private List<Municipio> municipios = new ArrayList<Municipio>();
+
+	// ############## Helper Methods #####################
+
+	public void addMunicipio(Municipio m) {
+		m.setDepartamento(this);
+		this.municipios.add(m);
+	}
+
+	public void removeMunicipio(Municipio m) {
+		m.setDepartamento(null);
+		this.municipios.remove(m);
+	}
+
+	// ############### Getters and Setters ###############33
 
 	public int getId() {
 		return id;

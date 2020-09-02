@@ -3,8 +3,8 @@ package com.empresa.creditos.entity.direccion;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -39,34 +39,26 @@ public class Municipio implements Serializable {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "departamento_id", nullable = false)
-	@JsonIgnoreProperties(value = { "hibernateLazyInitializer", "handler", "municipios" })
+	@JsonIgnoreProperties(value = { "municipios", "hibernateLazyInitializer" })
 	private Departamento departamento;
 
-	@OneToMany(mappedBy = "municipio")
+	@OneToMany(mappedBy = "municipio", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnoreProperties(value = { "municipio" })
 	private List<Barrio> barrios = new ArrayList<>();
 
-//	##########
+	// ########## Helper Methods ###################
 
-	@Override
-	public boolean equals(Object o) {
-
-		if (o == this)
-			return true;
-
-		if (!(o instanceof Municipio) || o == null)
-			return false;
-
-		Municipio that = (Municipio) o;
-		
-		return Objects.equals(that.id, id);
+	public void addBarrio(Barrio b) {
+		b.setMunicipio(this);
+		this.barrios.add(b);
 	}
-	
-	@Override
-	public int hashCode() {
-		
-		return 31;
+
+	public void removeBarrios(Barrio b) {
+		b.setMunicipio(null);
+		this.barrios.remove(b);
 	}
+
+	// ################# Getters and Setters ################
 
 	public int getId() {
 		return id;
@@ -99,6 +91,26 @@ public class Municipio implements Serializable {
 	public void setBarrios(List<Barrio> barrios) {
 		this.barrios = barrios;
 	}
+
+	// @Override
+	// public boolean equals(Object o) {
+
+	// if (o == this)
+	// return true;
+
+	// if (!(o instanceof Municipio) || o == null)
+	// return false;
+
+	// Municipio that = (Municipio) o;
+
+	// return Objects.equals(that.id, id);
+	// }
+
+	// @Override
+	// public int hashCode() {
+
+	// return 31;
+	// }
 
 	private static final long serialVersionUID = 1L;
 }

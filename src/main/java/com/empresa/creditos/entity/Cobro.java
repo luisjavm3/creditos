@@ -3,10 +3,10 @@ package com.empresa.creditos.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,16 +16,15 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Formula;
-import org.hibernate.annotations.NaturalId;
-
 import com.empresa.creditos.entity.credito.Credito;
 import com.empresa.creditos.entity.liquidacion.Liquidacion;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.NaturalId;
+
 @Entity
 @Table(name = "cobros")
-@NamedEntityGraph(name = "graph.Cobro.clientes", attributeNodes = @NamedAttributeNode(value = "clientes"))
 public class Cobro implements Serializable {
 
 	public Cobro() {
@@ -45,9 +44,10 @@ public class Cobro implements Serializable {
 	@Formula(value = "SELECT sum(c.saldo) FROM creditos c WHERE id = c.cobro_id")
 	private Integer total;
 
-//	#####
+	// #####
 
-	@OneToOne(mappedBy = "cobro")
+	@OneToOne(mappedBy = "cobro", cascade = { CascadeType.PERSIST, CascadeType.REFRESH,
+			CascadeType.MERGE }, orphanRemoval = false, fetch = FetchType.LAZY)
 	@JsonIgnoreProperties(value = { "creditos", "cobro" })
 	private Cobrador cobrador;
 
@@ -63,16 +63,31 @@ public class Cobro implements Serializable {
 	@JsonIgnoreProperties(value = { "cobro", "abonos" })
 	private List<Liquidacion> liquidaciones = new ArrayList<Liquidacion>();
 
-//	##########
+	// ############# Helper Methods #############
+
+	public void setCobrador(Cobrador c) {
+		if (c == null) {
+			if (this.cobrador != null) {
+				this.cobrador.setCobro(null);
+			}
+		} else {
+			c.setCobro(this);
+		}
+		this.cobrador = c;
+	}
+
+	public Cobrador getCobrador() {
+		return this.cobrador;
+	}
 
 	public void addCliente(Cliente c) {
 		this.clientes.add(c);
 		c.setCobro(this);
 	}
 
-	public void addCredito(Credito c) {
-		this.creditos.add(c);
-		c.setCobro(this);
+	public void removeCliente(Cliente c) {
+		this.clientes.remove(c);
+		c.setCobro(null);
 	}
 
 	public void addLiquidacion(Liquidacion l) {
@@ -80,40 +95,25 @@ public class Cobro implements Serializable {
 		l.setCobro(this);
 	}
 
-	public List<Credito> getCreditos() {
-		return creditos;
+	public void removeLiquidacion(Liquidacion l) {
+		this.liquidaciones.remove(l);
+		l.setCobro(null);
 	}
 
-	public List<Liquidacion> getLiquidaciones() {
-		return liquidaciones;
+	// #######################################
+
+	public Integer getTotal() {
+		if (this.total == null)
+			return 0;
+		return this.total;
 	}
 
-	public void setLiquidaciones(List<Liquidacion> liquidaciones) {
-		this.liquidaciones = liquidaciones;
-	}
-
-	public void setCreditos(List<Credito> creditos) {
-		this.creditos = creditos;
-	}
-
-	public List<Cliente> getClientes() {
-		return clientes;
-	}
-
-	public void setClientes(List<Cliente> clientes) {
-		this.clientes = clientes;
-	}
-
-	public Cobrador getCobrador() {
-		return cobrador;
-	}
-
-	public void setCobrador(Cobrador cobrador) {
-		this.cobrador = cobrador;
+	public void setTotal(Integer total) {
+		this.total = total;
 	}
 
 	public int getId() {
-		return id;
+		return this.id;
 	}
 
 	public void setId(int id) {
@@ -121,45 +121,35 @@ public class Cobro implements Serializable {
 	}
 
 	public String getNombre() {
-		return nombre;
+		return this.nombre;
 	}
 
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
 
-	public int getTotal() {
-		return total;
+	public List<Cliente> getClientes() {
+		return this.clientes;
 	}
 
-	public void setTotal(int total) {
-		this.total = total;
+	public void setClientes(List<Cliente> clientes) {
+		this.clientes = clientes;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-
-		if (this == o)
-			return true;
-
-		if (!(o instanceof Cobro) || o == null)
-			return false;
-
-		Cobro that = (Cobro) o;
-
-		return Objects.equals(that.nombre, nombre);
+	public List<Credito> getCreditos() {
+		return this.creditos;
 	}
 
-	@Override
-	public int hashCode() {
-
-		return Objects.hash(nombre);
+	public void setCreditos(List<Credito> creditos) {
+		this.creditos = creditos;
 	}
 
-	@Override
-	public String toString() {
+	public List<Liquidacion> getLiquidaciones() {
+		return this.liquidaciones;
+	}
 
-		return "id: " + id + " nombre: " + nombre;
+	public void setLiquidaciones(List<Liquidacion> liquidaciones) {
+		this.liquidaciones = liquidaciones;
 	}
 
 	private static final long serialVersionUID = 1L;

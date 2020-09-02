@@ -8,6 +8,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -16,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Formula;
 
@@ -30,59 +32,98 @@ public class Liquidacion implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
-	@Column(name = "fecha_liquidacion")
+	@Column(name = "fecha_liquidacion", nullable = false, updatable = false)
 	private Date fechaLiquidacion;
 
-	@Column
+	@Column(nullable = false)
 	private int efectivo;
 
-	@Column
+	@Column(nullable = false)
 	private int base;
 
-	@Formula(value = "select sum(a.abono) from abonos a where id = a.liquidacion_id")
+	@Formula(value = "SELECT SUM(a.abono) FROM abonos a WHERE a.liquidacion_id = id")
 	private Integer cobrado;
 
-//	@Formula(value = "SELECT sum()")
-	private int totalBoletas;
+	@Formula(value = "SELECT SUM(c.boleta) FROM creditos c WHERE c.fecha_credito = fecha_liquidacion AND c.cobro_id = cobro_id")
+	private Integer totalBoletas;
 
-	private int totalCreditos;
+	@Formula(value = "SELECT SUM(c.total) FROM creditos c WHERE c.fecha_credito = fecha_liquidacion AND c.cobro_id = cobro_id")
+	private Integer totalCreditos;
 
-	@Column(nullable = true)
+	@Column(nullable = false)
 	private int gastos;
 
 	@Column(nullable = true)
 	private String nota;
 
+	@Transient
 	private int resultado;
 
-//	#####
+	// #####
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cobro_id", referencedColumnName = "id")
-	@JsonIgnoreProperties(value = { "clientes", "creditos", "liquidaciones" })
+	@JsonIgnoreProperties(value = { "clientes", "creditos", "liquidaciones", "hibernateLazyInitializer" })
 	private Cobro cobro;
 
 	@OneToMany(mappedBy = "liquidacion", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnoreProperties(value = { "id", "liquidacion" })
 	private List<Abono> abonos = new ArrayList<Abono>();
 
-//	##########
+	// ########## Enity's life cycle ############
 
 	@PrePersist
 	public void init() {
 		this.fechaLiquidacion = new Date();
 	}
 
-	public void addAbono(Abono abono) {
-		this.abonos.add(abono);
-		abono.setLiquidacion(this);
+	// ############### Helpers Methods ###################
+
+	public void addAbono(Abono a) {
+		a.setLiquidacion(this);
+		this.abonos.add(a);
 	}
-	
-//	###############
-	
+
+	public void removeAbono(Abono a) {
+		a.setLiquidacion(null);
+		this.abonos.remove(a);
+	}
+
+	// ############### Getters and Setters ##################
+
+	public int getCobrado() {
+		if (cobrado == null)
+			return 0;
+		return cobrado;
+	}
+
+	public void setCobrado(int cobrado) {
+		this.cobrado = cobrado;
+	}
+
+	public int getTotalBoletas() {
+		if (totalBoletas == null)
+			return 0;
+		return totalBoletas;
+	}
+
+	public void setTotalBoletas(int totalBoletas) {
+		this.totalBoletas = totalBoletas;
+	}
+
+	public int getTotalCreditos() {
+		if (this.totalCreditos == null)
+			return 0;
+		return totalCreditos;
+	}
+
+	public void setTotalCreditos(int totalCreditos) {
+		this.totalCreditos = totalCreditos;
+	}
+
 	public int getResultado() {
-		return resultado;
-//		return efectivo - cobrado - base - totalBoletas + totalCreditos + gastos;
+		// return resultado;
+		return efectivo - cobrado - base - totalBoletas + totalCreditos + gastos;
 	}
 
 	public void setResultado(int resultado) {
@@ -121,36 +162,12 @@ public class Liquidacion implements Serializable {
 		this.efectivo = efectivo;
 	}
 
-	public int getCobrado() {
-		return cobrado;
-	}
-
-	public void setCobrado(int cobrado) {
-		this.cobrado = cobrado;
-	}
-
 	public int getBase() {
 		return base;
 	}
 
 	public void setBase(int base) {
 		this.base = base;
-	}
-
-	public int getTotalBoletas() {
-		return totalBoletas;
-	}
-
-	public void setTotalBoletas(int totalBoletas) {
-		this.totalBoletas = totalBoletas;
-	}
-
-	public int getTotalCreditos() {
-		return totalCreditos;
-	}
-
-	public void setTotalCreditos(int totalCreditos) {
-		this.totalCreditos = totalCreditos;
 	}
 
 	public int getGastos() {
@@ -177,10 +194,5 @@ public class Liquidacion implements Serializable {
 		this.abonos = abonos;
 	}
 
-	@Override
-	public String toString() {
-		return "liquidacion_id: "+id+" cobro_id "+cobro.getId()+" fecha_liquidacion: "+fechaLiquidacion;
-	}
-	
 	private static final long serialVersionUID = 1L;
 }

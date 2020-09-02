@@ -10,7 +10,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.validation.constraints.Size;
 
 import com.empresa.creditos.entity.Cobrador;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -24,12 +23,11 @@ public class TelefonoCobrador implements Serializable {
 	private int id;
 
 	@Column(nullable = false)
-	@Size(min = 10, max = 10, message = "El telefono debe tener 10 digitos")
 	private String numero;
 
 	@ManyToOne
 	@JoinColumn(name = "cobrador_id", nullable = false)
-	@JsonIgnoreProperties(value = { "hibernateLazyInitializer", "handler", "telefonos" })
+	@JsonIgnoreProperties(value = { "telefonos", "hibernateLazyInitializer" })
 	private Cobrador cobrador;
 
 	public int getId() {

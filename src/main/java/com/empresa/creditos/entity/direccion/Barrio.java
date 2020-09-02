@@ -26,12 +26,12 @@ public class Barrio implements Serializable {
 	private String nombre;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "municipio_id")
-	@JsonIgnoreProperties(value = { "hibernateLazyInitializer", "handler", "barrios" })
+	@JoinColumn(name = "municipio_id", nullable = false)
+	@JsonIgnoreProperties(value = { "barrios", "hibernateLazyInitializer" })
 	private Municipio municipio;
 
-//	##########
-	
+	// ##########
+
 	public int getId() {
 		return id;
 	}
