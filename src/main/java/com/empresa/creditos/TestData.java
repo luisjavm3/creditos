@@ -1,12 +1,9 @@
 package com.empresa.creditos;
 
+import java.sql.Date;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.empresa.creditos.entity.Cliente;
 import com.empresa.creditos.entity.Cobrador;
@@ -23,6 +20,7 @@ import com.empresa.creditos.entity.liquidacion.Liquidacion;
 import com.empresa.creditos.service.IClienteService;
 import com.empresa.creditos.service.ICobradorService;
 import com.empresa.creditos.service.ICobroService;
+import com.empresa.creditos.service.credito.ICreditoService;
 import com.empresa.creditos.service.credito.IInteresService;
 import com.empresa.creditos.service.credito.IPerioricidadService;
 import com.empresa.creditos.service.credito.IPlazoService;
@@ -30,6 +28,9 @@ import com.empresa.creditos.service.direccion.IDepartamentoService;
 import com.empresa.creditos.service.direccion.IDireccionService;
 import com.empresa.creditos.service.direccion.IMunicipioService;
 import com.empresa.creditos.service.liquidacion.ILiquidacionService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class TestData {
@@ -50,57 +51,52 @@ public class TestData {
 	private ICobroService cobroService;
 	@Autowired
 	private ICobradorService cobradorService;
-//	@Autowired
-//	private ICreditoService creditoService;
+	@Autowired
+	private ICreditoService creditoService;
 	@Autowired
 	private ILiquidacionService liquidacionService;
 	@Autowired
 	private IClienteService clienteService;
 
-	Departamento cordoba;
-	Municipio monteria;
+	private Departamento cordoba;
+	private Municipio monteria;
+	private Cobro cobro;
 
 	@PostConstruct
 	public void populateDatabase() {
 
 		this.insertarTodosLosDepartamentosDeColombia();
+		cordoba = departamentoService.findByNombre("CORDOBA");
 		this.insertarMunicipiosDeCordoba();
-
-		this.cordoba = this.departamentoService.findByNombre("CORDOBA");
-		this.monteria = this.cordoba.getMunicipios().get(12);
-
+		monteria = municipioService.findByNombre("MONTERIA");
 		this.insertarInteresPorDefecto();
 		this.insertarPlazosPorDefecto();
 		this.insertarPerioricidadPorDefecto();
 
-//		COBROS
+		// COBROS Y COBRADORES
 		Cobro cobro1 = new Cobro("PRIMER COBRO ( 1 )");
 		Cobro cobro2 = new Cobro("SEGUNDO COBRO ( 2 )");
-		cobro1 = this.cobroService.save(cobro1);
-		cobro2 = this.cobroService.save(cobro2);
 
-//		COBRADOR
 		Cobrador cobrador1 = new Cobrador(123457, "NOMBRES COBRADOR UNO", "APELLIDOS COBRADOR UNO", "EL ZARCO");
 		Direccion direccionCobrador1 = new Direccion(cordoba, monteria, null,
 				"AVENIDA SIEMPREVIVA, CALLE DEL INFIERNO");
-		direccionCobrador1 = this.direccionService.save(direccionCobrador1);
 		cobrador1.setDireccion(direccionCobrador1);
-		cobrador1.setCobro(cobro1);
-		cobrador1 = this.cobradorService.save(cobrador1);
 
-//		CLIENTES
-		insertarClientesDePrueba(cobro1);
+		cobro1.setCobrador(cobrador1);
+		this.cobro = cobroService.save(cobro1); // Asignado el valor del cobro de prueba como atributo de la clase
+		cobroService.save(cobro2);
 
-		cobro1 = this.cobroService.findById(cobro1.getId());
+		// // CLIENTES
+		insertarClientesDePrueba();
 
-//		CREDITOS
-		insertarCreditosDePrueba(cobro1);
+		// // CREDITOS
+		insertarCreditosDePrueba();
 
-//		LIQUIDACIONES
-		insertarLiquidacionesDePrueba(cobro1);
-		realizarLiquidacionDeLaPrimeraLiquidacion(cobro1);
-		realizarSegundaLiquidacionDeLaPrimeraLiquidacion(cobro1);
-		
+		// LIQUIDACIONES
+		insertarLiquidacionesDePrueba();
+		realizarLiquidacionDeLaPrimeraLiquidacion();
+		realizarSegundaLiquidacionDeLaPrimeraLiquidacion();
+
 	}
 
 	public void insertarTodosLosDepartamentosDeColombia() {
@@ -169,7 +165,6 @@ public class TestData {
 		d31.setNombre("VAUPES");
 		Departamento d32 = new Departamento();
 		d32.setNombre("VICHADA");
-
 		this.departamentoService.save(d1);
 		this.departamentoService.save(d2);
 		this.departamentoService.save(d3);
@@ -206,70 +201,69 @@ public class TestData {
 
 	public void insertarMunicipiosDeCordoba() {
 
-		Departamento cordoba = this.departamentoService.findByNombre("CORDOBA");
+		cordoba.setMunicipios(new ArrayList<>());
 
-		Municipio m1 = new Municipio(cordoba, "AYAPEL");
-		Municipio m2 = new Municipio(cordoba, "BUENAVISTA");
-		Municipio m3 = new Municipio(cordoba, "CANALETE");
-		Municipio m4 = new Municipio(cordoba, "CERETE");
-		Municipio m5 = new Municipio(cordoba, "CHIMA");
-		Municipio m6 = new Municipio(cordoba, "CHINU");
-		Municipio m7 = new Municipio(cordoba, "CIENAGA DE ORO");
-		Municipio m8 = new Municipio(cordoba, "COTORRA");
-		Municipio m9 = new Municipio(cordoba, "LA APARTADA");
-		Municipio m10 = new Municipio(cordoba, "LOS CORDOBAS");
-		Municipio m11 = new Municipio(cordoba, "MOMIL");
-		Municipio m12 = new Municipio(cordoba, "MONTELIBANO");
-		Municipio m13 = new Municipio(cordoba, "MONTERIA");
-		Municipio m14 = new Municipio(cordoba, "MOÑITOS");
-		Municipio m15 = new Municipio(cordoba, "PLANETA RICA");
-		Municipio m16 = new Municipio(cordoba, "PUEBLO NUEVO");
-		Municipio m17 = new Municipio(cordoba, "PUERTO ESCONDIDO");
-		Municipio m18 = new Municipio(cordoba, "PUERTO LIBERTADOR");
-		Municipio m19 = new Municipio(cordoba, "PURISIMA");
-		Municipio m20 = new Municipio(cordoba, "SAHAGUN");
-		Municipio m21 = new Municipio(cordoba, "SAN ANDRES DE SOTAVENTO");
-		Municipio m22 = new Municipio(cordoba, "SAN ANTERO");
-		Municipio m23 = new Municipio(cordoba, "SAN BERNARDO DEL VIENTO");
-		Municipio m24 = new Municipio(cordoba, "SAN CARLOS");
-		Municipio m25 = new Municipio(cordoba, "SAN JOSE DE URE");
-		Municipio m26 = new Municipio(cordoba, "SAN PELAYO");
-		Municipio m27 = new Municipio(cordoba, "SANTA CRUZ DE LORICA");
-		Municipio m28 = new Municipio(cordoba, "TIERRALTA");
-		Municipio m29 = new Municipio(cordoba, "TUCHIN");
-		Municipio m30 = new Municipio(cordoba, "VALENCIA");
-
-		this.municipioService.save(m1);
-		this.municipioService.save(m2);
-		this.municipioService.save(m3);
-		this.municipioService.save(m4);
-		this.municipioService.save(m5);
-		this.municipioService.save(m6);
-		this.municipioService.save(m7);
-		this.municipioService.save(m8);
-		this.municipioService.save(m9);
-		this.municipioService.save(m10);
-		this.municipioService.save(m11);
-		this.municipioService.save(m12);
-		this.municipioService.save(m13);
-		this.municipioService.save(m14);
-		this.municipioService.save(m15);
-		this.municipioService.save(m16);
-		this.municipioService.save(m17);
-		this.municipioService.save(m18);
-		this.municipioService.save(m19);
-		this.municipioService.save(m20);
-		this.municipioService.save(m21);
-		this.municipioService.save(m22);
-		this.municipioService.save(m23);
-		this.municipioService.save(m24);
-		this.municipioService.save(m25);
-		this.municipioService.save(m26);
-		this.municipioService.save(m27);
-		this.municipioService.save(m28);
-		this.municipioService.save(m29);
-		this.municipioService.save(m30);
-
+		Municipio m1 = new Municipio("AYAPEL");
+		Municipio m2 = new Municipio("BUENAVISTA");
+		Municipio m3 = new Municipio("CANALETE");
+		Municipio m4 = new Municipio("CERETE");
+		Municipio m5 = new Municipio("CHIMA");
+		Municipio m6 = new Municipio("CHINU");
+		Municipio m7 = new Municipio("CIENAGA DE ORO");
+		Municipio m8 = new Municipio("COTORRA");
+		Municipio m9 = new Municipio("LA APARTADA");
+		Municipio m10 = new Municipio("LOS CORDOBAS");
+		Municipio m11 = new Municipio("MOMIL");
+		Municipio m12 = new Municipio("MONTELIBANO");
+		Municipio m13 = new Municipio("MONTERIA");
+		Municipio m14 = new Municipio("MOÑITOS");
+		Municipio m15 = new Municipio("PLANETA RICA");
+		Municipio m16 = new Municipio("PUEBLO NUEVO");
+		Municipio m17 = new Municipio("PUERTO ESCONDIDO");
+		Municipio m18 = new Municipio("PUERTO LIBERTADOR");
+		Municipio m19 = new Municipio("PURISIMA");
+		Municipio m20 = new Municipio("SAHAGUN");
+		Municipio m21 = new Municipio("SAN ANDRES DE SOTAVENTO");
+		Municipio m22 = new Municipio("SAN ANTERO");
+		Municipio m23 = new Municipio("SAN BERNARDO DEL VIENTO");
+		Municipio m24 = new Municipio("SAN CARLOS");
+		Municipio m25 = new Municipio("SAN JOSE DE URE");
+		Municipio m26 = new Municipio("SAN PELAYO");
+		Municipio m27 = new Municipio("SANTA CRUZ DE LORICA");
+		Municipio m28 = new Municipio("TIERRALTA");
+		Municipio m29 = new Municipio("TUCHIN");
+		Municipio m30 = new Municipio("VALENCIA");
+		cordoba.addMunicipio(m1);
+		cordoba.addMunicipio(m2);
+		cordoba.addMunicipio(m3);
+		cordoba.addMunicipio(m4);
+		cordoba.addMunicipio(m5);
+		cordoba.addMunicipio(m6);
+		cordoba.addMunicipio(m7);
+		cordoba.addMunicipio(m8);
+		cordoba.addMunicipio(m9);
+		cordoba.addMunicipio(m10);
+		cordoba.addMunicipio(m11);
+		cordoba.addMunicipio(m12);
+		cordoba.addMunicipio(m13);
+		cordoba.addMunicipio(m14);
+		cordoba.addMunicipio(m15);
+		cordoba.addMunicipio(m16);
+		cordoba.addMunicipio(m17);
+		cordoba.addMunicipio(m18);
+		cordoba.addMunicipio(m19);
+		cordoba.addMunicipio(m20);
+		cordoba.addMunicipio(m21);
+		cordoba.addMunicipio(m22);
+		cordoba.addMunicipio(m23);
+		cordoba.addMunicipio(m24);
+		cordoba.addMunicipio(m25);
+		cordoba.addMunicipio(m26);
+		cordoba.addMunicipio(m27);
+		cordoba.addMunicipio(m28);
+		cordoba.addMunicipio(m29);
+		cordoba.addMunicipio(m30);
+		departamentoService.save(cordoba);
 	}
 
 	public void insertarInteresPorDefecto() {
@@ -329,18 +323,21 @@ public class TestData {
 		this.perioricidadService.save(perioricidad3);
 	}
 
-	public void insertarClientesDePrueba(Cobro cobro) {
+	public void insertarClientesDePrueba() {
 
-		Cliente cliente1 = new Cliente(123456, "NOMBRES CLIENTE UNO", "APELLIDOS CLIENTE UNO", "PRIMERO", cobro);
-		Cliente cliente2 = new Cliente(123457, "NOMBRES CLIENTE DOS", "APELLIDOS CLIENTE DOS", "SEGUNDO", cobro);
-		Cliente cliente3 = new Cliente(123458, "NOMBRES CLIENTE TRES", "APELLIDOS CLIENTE TRES", "TERCERO", cobro);
-		Cliente cliente4 = new Cliente(123459, "NOMBRES CLIENTE CUATRO", "APELLIDOS CLIENTE CUATRO", "CUARTO", cobro);
-		Cliente cliente5 = new Cliente(123460, "NOMBRES CLIENTE CINCO", "APELLIDOS CLIENTE CINCO", "QUINTO", cobro);
-		Cliente cliente6 = new Cliente(123461, "NOMBRES CLIENTE SEIS", "APELLIDOS CLIENTE SEIS", "SEXTO", cobro);
-		Cliente cliente7 = new Cliente(123462, "NOMBRES CLIENTE SIETE", "APELLIDOS CLIENTE SIETE", "SEPTIMO", cobro);
-		Cliente cliente8 = new Cliente(123463, "NOMBRES CLIENTE OCHO", "APELLIDOS CLIENTE OCHO", "OCTAVO", cobro);
-		Cliente cliente9 = new Cliente(123464, "NOMBRES CLIENTE NUEVE", "APELLIDOS CLIENTE NUEVE", "NOVENO", cobro);
-		Cliente cliente10 = new Cliente(123465, "NOMBRES CLIENTE DIEZ", "APELLIDOS CLIENTE DIEZ", "DECIMO", cobro);
+		Cobro cobro;
+
+		try {
+			cobro = cobroService.findById(1);
+			System.out.println("===== " + cobro.getId() + " " + cobro.getNombre() + " =====");
+			System.out.println("TestData.insertarClientesDePrueba()");
+		} catch (Exception e) {
+			System.err.println("============== ERROR ==============");
+			System.out.println("TestData.insertarClientesDePrueba()");
+			return;
+		}
+
+		cobro.setClientes(new ArrayList<>());
 
 		Direccion direccion1 = new Direccion(cordoba, monteria, null, "DIRECCION DEL PRIMER CLIENTE");
 		Direccion direccion2 = new Direccion(cordoba, monteria, null, "DIRECCION DEL SEGUNDO CLIENTE");
@@ -352,7 +349,6 @@ public class TestData {
 		Direccion direccion8 = new Direccion(cordoba, monteria, null, "DIRECCION DEL OCTAVO CLIENTE");
 		Direccion direccion9 = new Direccion(cordoba, monteria, null, "DIRECCION DEL NOVENO CLIENTE");
 		Direccion direccion10 = new Direccion(cordoba, monteria, null, "DIRECCION DEL DECIMO CLIENTE");
-
 		direccion1 = this.direccionService.save(direccion1);
 		direccion2 = this.direccionService.save(direccion2);
 		direccion3 = this.direccionService.save(direccion3);
@@ -364,6 +360,16 @@ public class TestData {
 		direccion9 = this.direccionService.save(direccion9);
 		direccion10 = this.direccionService.save(direccion10);
 
+		Cliente cliente1 = new Cliente(123456, "NOMBRES CLIENTE UNO", "APELLIDOS CLIENTE UNO", "PRIMERO");
+		Cliente cliente2 = new Cliente(123457, "NOMBRES CLIENTE DOS", "APELLIDOS CLIENTE DOS", "SEGUNDO");
+		Cliente cliente3 = new Cliente(123458, "NOMBRES CLIENTE TRES", "APELLIDOS CLIENTE TRES", "TERCERO");
+		Cliente cliente4 = new Cliente(123459, "NOMBRES CLIENTE CUATRO", "APELLIDOS CLIENTE CUATRO", "CUARTO");
+		Cliente cliente5 = new Cliente(123460, "NOMBRES CLIENTE CINCO", "APELLIDOS CLIENTE CINCO", "QUINTO");
+		Cliente cliente6 = new Cliente(123461, "NOMBRES CLIENTE SEIS", "APELLIDOS CLIENTE SEIS", "SEXTO");
+		Cliente cliente7 = new Cliente(123462, "NOMBRES CLIENTE SIETE", "APELLIDOS CLIENTE SIETE", "SEPTIMO");
+		Cliente cliente8 = new Cliente(123463, "NOMBRES CLIENTE OCHO", "APELLIDOS CLIENTE OCHO", "OCTAVO");
+		Cliente cliente9 = new Cliente(123464, "NOMBRES CLIENTE NUEVE", "APELLIDOS CLIENTE NUEVE", "NOVENO");
+		Cliente cliente10 = new Cliente(123465, "NOMBRES CLIENTE DIEZ", "APELLIDOS CLIENTE DIEZ", "DECIMO");
 		cliente1.setDireccion(direccion1);
 		cliente2.setDireccion(direccion2);
 		cliente3.setDireccion(direccion3);
@@ -375,129 +381,138 @@ public class TestData {
 		cliente9.setDireccion(direccion9);
 		cliente10.setDireccion(direccion10);
 
-		cliente1 = this.clienteService.save(cliente1);
-		cliente2 = this.clienteService.save(cliente2);
-		cliente3 = this.clienteService.save(cliente3);
-		cliente4 = this.clienteService.save(cliente4);
-		cliente5 = this.clienteService.save(cliente5);
-		cliente6 = this.clienteService.save(cliente6);
-		cliente7 = this.clienteService.save(cliente7);
-		cliente8 = this.clienteService.save(cliente8);
-		cliente9 = this.clienteService.save(cliente9);
-		cliente10 = this.clienteService.save(cliente10);
+		cobro.addCliente(cliente1);
+		cobro.addCliente(cliente2);
+		cobro.addCliente(cliente3);
+		cobro.addCliente(cliente4);
+		cobro.addCliente(cliente5);
+		cobro.addCliente(cliente6);
+		cobro.addCliente(cliente7);
+		cobro.addCliente(cliente8);
+		cobro.addCliente(cliente9);
+		cobro.addCliente(cliente10);
+
+		cobroService.save(cobro);
 	}
 
-	public void insertarCreditosDePrueba(Cobro cobro) {
+	public void insertarCreditosDePrueba() {
 
 		Interes interes = this.interesService.findByInteres(20);
 		Perioricidad perioricidad = this.perioricidadService.findByDescripcion("DIARIO");
 		Plazo plazo = this.plazoService.findByDescripcion("MENSUAL");
 
-		Credito credito1 = new Credito(cobro.getClientes().get(0), cobro.getCobrador(), 100, interes, perioricidad,
-				plazo);
-		Credito credito2 = new Credito(cobro.getClientes().get(1), cobro.getCobrador(), 100, interes, perioricidad,
-				plazo);
-		Credito credito3 = new Credito(cobro.getClientes().get(2), cobro.getCobrador(), 100, interes, perioricidad,
-				plazo);
-		Credito credito4 = new Credito(cobro.getClientes().get(3), cobro.getCobrador(), 100, interes, perioricidad,
-				plazo);
-		Credito credito5 = new Credito(cobro.getClientes().get(4), cobro.getCobrador(), 100, interes, perioricidad,
-				plazo);
-		Credito credito6 = new Credito(cobro.getClientes().get(5), cobro.getCobrador(), 100, interes, perioricidad,
-				plazo);
-		Credito credito7 = new Credito(cobro.getClientes().get(6), cobro.getCobrador(), 100, interes, perioricidad,
-				plazo);
-		Credito credito8 = new Credito(cobro.getClientes().get(7), cobro.getCobrador(), 100, interes, perioricidad,
-				plazo);
-		Credito credito9 = new Credito(cobro.getClientes().get(8), cobro.getCobrador(), 100, interes, perioricidad,
-				plazo);
-		Credito credito10 = new Credito(cobro.getClientes().get(9), cobro.getCobrador(), 100, interes, perioricidad,
-				plazo);
+		Cliente cliente1 = clienteService.findByCedula(123456);
+		Cliente cliente2 = clienteService.findByCedula(123457);
+		Cliente cliente3 = clienteService.findByCedula(123458);
+		Cliente cliente4 = clienteService.findByCedula(123459);
+		Cliente cliente5 = clienteService.findByCedula(123460);
+		Cliente cliente6 = clienteService.findByCedula(123461);
+		Cliente cliente7 = clienteService.findByCedula(123462);
+		Cliente cliente8 = clienteService.findByCedula(123463);
+		Cliente cliente9 = clienteService.findByCedula(123464);
+		Cliente cliente10 = clienteService.findByCedula(123465);
+		// Se insertan los cobro debido a que no vienen en el resultado de la
+		// busqueda(ya que no estamos en un contexto de persistencia)
+		cliente1.setCobro(cobro);
+		cliente2.setCobro(cobro);
+		cliente3.setCobro(cobro);
+		cliente4.setCobro(cobro);
+		cliente5.setCobro(cobro);
+		cliente6.setCobro(cobro);
+		cliente7.setCobro(cobro);
+		cliente8.setCobro(cobro);
+		cliente9.setCobro(cobro);
+		cliente10.setCobro(cobro);
 
-//		credito1.setPosicionEnRuta(1);
-//		credito2.setPosicionEnRuta(2);
-//		credito3.setPosicionEnRuta(3);
-//		credito4.setPosicionEnRuta(4);
-//		credito5.setPosicionEnRuta(5);
-//		credito6.setPosicionEnRuta(6);
-//		credito7.setPosicionEnRuta(7);
-//		credito8.setPosicionEnRuta(8);
-//		credito9.setPosicionEnRuta(9);
-//		credito10.setPosicionEnRuta(10);
-		
-		cobro.setCreditos(new ArrayList<Credito>());
+		Credito credito1 = new Credito(100, 1, 1, interes, perioricidad, plazo);
+		Credito credito2 = new Credito(100, 2, 2, interes, perioricidad, plazo);
+		Credito credito3 = new Credito(100, 3, 3, interes, perioricidad, plazo);
+		Credito credito4 = new Credito(100, 4, 4, interes, perioricidad, plazo);
+		Credito credito5 = new Credito(100, 5, 5, interes, perioricidad, plazo);
+		Credito credito6 = new Credito(100, 6, 6, interes, perioricidad, plazo);
+		Credito credito7 = new Credito(100, 7, 7, interes, perioricidad, plazo);
+		Credito credito8 = new Credito(100, 8, 8, interes, perioricidad, plazo);
+		Credito credito9 = new Credito(100, 9, 9, interes, perioricidad, plazo);
+		Credito credito10 = new Credito(100, 10, 10, interes, perioricidad, plazo);
+		cliente1.setCredito(credito1);
+		cliente2.setCredito(credito2);
+		cliente3.setCredito(credito3);
+		cliente4.setCredito(credito4);
+		cliente5.setCredito(credito5);
+		cliente6.setCredito(credito6);
+		cliente7.setCredito(credito7);
+		cliente8.setCredito(credito8);
+		cliente9.setCredito(credito9);
+		cliente10.setCredito(credito10);
 
-		cobro.addCredito(credito1);
-		cobro.addCredito(credito2);
-		cobro.addCredito(credito3);
-		cobro.addCredito(credito4);
-		cobro.addCredito(credito5);
-		cobro.addCredito(credito6);
-		cobro.addCredito(credito7);
-		cobro.addCredito(credito8);
-		cobro.addCredito(credito9);
-		cobro.addCredito(credito10);
-
-		this.cobroService.save(cobro);
+		clienteService.save(cliente1);
+		clienteService.save(cliente2);
+		clienteService.save(cliente3);
+		clienteService.save(cliente4);
+		clienteService.save(cliente5);
+		clienteService.save(cliente6);
+		clienteService.save(cliente7);
+		clienteService.save(cliente8);
+		clienteService.save(cliente9);
+		clienteService.save(cliente10);
 	}
 
-	public void insertarLiquidacionesDePrueba(Cobro cobro) {
+	public void insertarLiquidacionesDePrueba() {
 
-		Liquidacion liquidacion1 = new Liquidacion();
-		Liquidacion liquidacion2 = new Liquidacion();
+		Date date1 = new Date(120, 5, 1);
+		Date date2 = new Date(120, 5, 2);
+		Date date3 = new Date(120, 5, 3);
 
-		cobro.setLiquidaciones(new ArrayList<Liquidacion>());
+		Liquidacion liquidacion1 = new Liquidacion(date1, 10, 10, 10, "Esta es la PRIMERA liquidaion");
+		Liquidacion liquidacion2 = new Liquidacion(date2, 10, 10, 10, "Esta es la SEGUNDA liquidaion");
+		Liquidacion liquidacion3 = new Liquidacion(date3, 10, 10, 10, "Esta es la TERCERA liquidaion");
+		// Liquidacion liquidacion2 = new Liquidacion(efectivo, base, gastos, nota)
 
-		cobro.addLiquidacion(liquidacion1);
-		cobro.addLiquidacion(liquidacion2);
+		this.cobro.setLiquidaciones(new ArrayList<Liquidacion>());
 
-		this.cobroService.save(cobro);
+		this.cobro.addLiquidacion(liquidacion1);
+		this.cobro.addLiquidacion(liquidacion2);
+		this.cobro.addLiquidacion(liquidacion3);
+
+		this.cobroService.save(this.cobro);
 	}
 
-	public void realizarLiquidacionDeLaPrimeraLiquidacion(Cobro cobro) {
+	public void realizarLiquidacionDeLaPrimeraLiquidacion() {
 
-		Cobro cobro1;
-		Liquidacion liquidacion;
-		Cobro cobro2;
-		List<Credito> creditos;
+		Liquidacion liquidacion = null;
 
 		try {
-			cobro1 = this.cobroService.findByIdWithLiquidaciones(cobro.getId());
-			liquidacion = cobro1.getLiquidaciones().get(0);
-			System.err.println(liquidacion.toString());
-
+			// Obteniendo la primera liquidacion
+			liquidacion = cobroService.findByIdWithLiquidaciones(1).getLiquidaciones().get(0);
+			liquidacion.setAbonos(new ArrayList<>());
 		} catch (Exception e) {
-			System.err.println("Error obteniendo las liquidaciones");
-			System.err.println("TestData.realizarLiquidacionDeLaPrimeraLiquidacion()");
+			System.err.println(
+					"======================== ERROR OBTENIENDO LAS LIQUIDACIONES DEL COBRO 1 ========================");
+			System.out.println("TestData.realizarLiquidacionDeLaPrimeraLiquidacion()");
 			return;
 		}
 
-		liquidacion.setAbonos(new ArrayList<Abono>());
+		Credito credito1 = creditoService.findById(1);
+		Credito credito2 = creditoService.findById(2);
+		Credito credito3 = creditoService.findById(3);
+		Credito credito4 = creditoService.findById(4);
+		Credito credito5 = creditoService.findById(5);
+		Credito credito6 = creditoService.findById(6);
+		Credito credito7 = creditoService.findById(7);
+		Credito credito8 = creditoService.findById(8);
+		Credito credito9 = creditoService.findById(9);
+		Credito credito10 = creditoService.findById(10);
 
-		try {
-			cobro2 = this.cobroService.findByIdWithCreditos(cobro.getId());
-			creditos = (List<Credito>) cobro2.getCreditos();
-
-			for (Credito credito : creditos) {
-				System.err.println(credito.toString());
-			}
-
-		} catch (Exception e) {
-			System.err.println("Error obteniendo los creditos");
-			System.err.println("TestData.realizarLiquidacionDeLaPrimeraLiquidacion()");
-			return;
-		}
-
-		Abono abono1 = new Abono(liquidacion, creditos.get(0), 1);
-		Abono abono2 = new Abono(liquidacion, creditos.get(1), 2);
-		Abono abono3 = new Abono(liquidacion, creditos.get(2), 3);
-		Abono abono4 = new Abono(liquidacion, creditos.get(3), 4);
-		Abono abono5 = new Abono(liquidacion, creditos.get(4), 5);
-		Abono abono6 = new Abono(liquidacion, creditos.get(5), 6);
-		Abono abono7 = new Abono(liquidacion, creditos.get(6), 7);
-		Abono abono8 = new Abono(liquidacion, creditos.get(7), 8);
-		Abono abono9 = new Abono(liquidacion, creditos.get(8), 9);
-		Abono abono10 = new Abono(liquidacion, creditos.get(9), 10);
+		Abono abono1 = new Abono(credito1, 1);
+		Abono abono2 = new Abono(credito2, 2);
+		Abono abono3 = new Abono(credito3, 3);
+		Abono abono4 = new Abono(credito4, 4);
+		Abono abono5 = new Abono(credito5, 5);
+		Abono abono6 = new Abono(credito6, 6);
+		Abono abono7 = new Abono(credito7, 7);
+		Abono abono8 = new Abono(credito8, 8);
+		Abono abono9 = new Abono(credito9, 9);
+		Abono abono10 = new Abono(credito10, 10);
 
 		liquidacion.addAbono(abono1);
 		liquidacion.addAbono(abono2);
@@ -513,50 +528,42 @@ public class TestData {
 		this.liquidacionService.save(liquidacion);
 	}
 
-	public void realizarSegundaLiquidacionDeLaPrimeraLiquidacion(Cobro cobro) {
+	public void realizarSegundaLiquidacionDeLaPrimeraLiquidacion() {
 
-		Cobro cobro1;
-		Liquidacion liquidacion;
-		Cobro cobro2;
-		List<Credito> creditos;
+		Liquidacion liquidacion = null;
 
 		try {
-			cobro1 = this.cobroService.findByIdWithLiquidaciones(cobro.getId());
-			liquidacion = cobro1.getLiquidaciones().get(1);
-			System.err.println(liquidacion.toString());
-
+			// Obteniendo la primera liquidacion
+			liquidacion = cobroService.findByIdWithLiquidaciones(1).getLiquidaciones().get(1);
+			liquidacion.setAbonos(new ArrayList<>());
 		} catch (Exception e) {
-			System.err.println("Error obteniendo las liquidaciones");
-			System.err.println("TestData.realizarLiquidacionDeLaPrimeraLiquidacion()");
+			System.err.println(
+					"======================== ERROR OBTENIENDO LAS LIQUIDACIONES DEL COBRO 1 ========================");
+			System.out.println("TestData.realizarLiquidacionDeLaPrimeraLiquidacion()");
 			return;
 		}
 
-		liquidacion.setAbonos(new ArrayList<Abono>());
+		Credito credito1 = creditoService.findById(1);
+		Credito credito2 = creditoService.findById(2);
+		Credito credito3 = creditoService.findById(3);
+		Credito credito4 = creditoService.findById(4);
+		Credito credito5 = creditoService.findById(5);
+		Credito credito6 = creditoService.findById(6);
+		Credito credito7 = creditoService.findById(7);
+		Credito credito8 = creditoService.findById(8);
+		Credito credito9 = creditoService.findById(9);
+		Credito credito10 = creditoService.findById(10);
 
-		try {
-			cobro2 = this.cobroService.findByIdWithCreditos(cobro.getId());
-			creditos = (List<Credito>) cobro2.getCreditos();
-
-			for (Credito credito : creditos) {
-				System.err.println(credito.toString());
-			}
-
-		} catch (Exception e) {
-			System.err.println("Error obteniendo los creditos");
-			System.err.println("TestData.realizarLiquidacionDeLaPrimeraLiquidacion()");
-			return;
-		}
-
-		Abono abono1 = new Abono(liquidacion, creditos.get(0), 5);
-		Abono abono2 = new Abono(liquidacion, creditos.get(1), 10);
-		Abono abono3 = new Abono(liquidacion, creditos.get(2), 15);
-		Abono abono4 = new Abono(liquidacion, creditos.get(3), 20);
-		Abono abono5 = new Abono(liquidacion, creditos.get(4), 25);
-		Abono abono6 = new Abono(liquidacion, creditos.get(5), 30);
-		Abono abono7 = new Abono(liquidacion, creditos.get(6), 35);
-		Abono abono8 = new Abono(liquidacion, creditos.get(7), 40);
-		Abono abono9 = new Abono(liquidacion, creditos.get(8), 45);
-		Abono abono10 = new Abono(liquidacion, creditos.get(9), 50);
+		Abono abono1 = new Abono(credito1, 10);
+		Abono abono2 = new Abono(credito2, 20);
+		Abono abono3 = new Abono(credito3, 30);
+		Abono abono4 = new Abono(credito4, 40);
+		Abono abono5 = new Abono(credito5, 50);
+		Abono abono6 = new Abono(credito6, 60);
+		Abono abono7 = new Abono(credito7, 70);
+		Abono abono8 = new Abono(credito8, 80);
+		Abono abono9 = new Abono(credito9, 90);
+		Abono abono10 = new Abono(credito10, 100);
 
 		liquidacion.addAbono(abono1);
 		liquidacion.addAbono(abono2);

@@ -3,7 +3,6 @@ package com.empresa.creditos.entity;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -18,27 +17,16 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.NaturalId;
-
 import com.empresa.creditos.entity.credito.Credito;
 import com.empresa.creditos.entity.direccion.Direccion;
 import com.empresa.creditos.entity.telefono.TelefonoCliente;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import org.hibernate.annotations.NaturalId;
+
 @Entity
 @Table(name = "clientes")
 public class Cliente implements Serializable {
-
-	public Cliente() {
-	}
-
-	public Cliente(int cedula, String nombres, String apellidos, String apodo, Cobro cobro) {
-		this.cedula = cedula;
-		this.nombres = nombres;
-		this.apellidos = apellidos;
-		this.apodo = apodo;
-		this.cobro = cobro;
-	}
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,7 +44,7 @@ public class Cliente implements Serializable {
 	@Column
 	private String apodo;
 
-	// #####
+	// ====================== Entity's Relationships ================
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cobro_id", referencedColumnName = "id", nullable = false)
@@ -76,7 +64,21 @@ public class Cliente implements Serializable {
 	@JsonIgnoreProperties(value = { "cliente" })
 	private List<TelefonoCliente> telefonos = new ArrayList<TelefonoCliente>();
 
-	// ########################### Helper Methods #####################
+	// ====================== Constructors ======================
+
+	public Cliente() {
+	}
+
+	public Cliente(int cedula, String nombres, String apellidos, String apodo) {
+		this.cedula = cedula;
+		this.nombres = nombres;
+		this.apellidos = apellidos;
+		this.apodo = apodo;
+	}
+
+	// ====================== Entity's Life Cycle ===================
+
+	// ====================== Helper Methods ======================
 
 	public void setCredito(Credito cr) {
 		if (cr == null) {
@@ -85,12 +87,11 @@ public class Cliente implements Serializable {
 			}
 		} else {
 			cr.setCliente(this);
+			// adding new features
+			cr.setCobro(this.cobro);
+			cr.setCobrador(this.cobro.getCobrador());
 		}
 		this.credito = cr;
-	}
-
-	public Credito getCredito() {
-		return credito;
 	}
 
 	public void addTelefono(TelefonoCliente t) {
@@ -103,7 +104,11 @@ public class Cliente implements Serializable {
 		this.telefonos.remove(t);
 	}
 
-	// #############################
+	// ====================== Getters and Setters ======================
+
+	public Credito getCredito() {
+		return credito;
+	}
 
 	public void setDireccion(Direccion direccion) {
 		this.direccion = direccion;

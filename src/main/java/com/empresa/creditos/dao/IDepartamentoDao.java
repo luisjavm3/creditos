@@ -1,11 +1,10 @@
 package com.empresa.creditos.dao;
 
 import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.repository.CrudRepository;
 
 import com.empresa.creditos.entity.direccion.Departamento;
+
+import org.springframework.data.repository.CrudRepository;
 
 public interface IDepartamentoDao extends CrudRepository<Departamento, Integer>{
 	

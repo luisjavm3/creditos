@@ -10,8 +10,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -27,13 +25,6 @@ import org.hibernate.annotations.NaturalId;
 @Table(name = "cobros")
 public class Cobro implements Serializable {
 
-	public Cobro() {
-	}
-
-	public Cobro(String nombre) {
-		this.nombre = nombre;
-	}
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
@@ -41,10 +32,10 @@ public class Cobro implements Serializable {
 	@NaturalId
 	private String nombre;
 
-	@Formula(value = "SELECT sum(c.saldo) FROM creditos c WHERE id = c.cobro_id")
+	@Formula(value = "SELECT SUM(c.saldo) FROM creditos c WHERE c.cobro_id =  id")
 	private Integer total;
 
-	// #####
+	// ====================== Entity's Relationships ======================
 
 	@OneToOne(mappedBy = "cobro", cascade = { CascadeType.PERSIST, CascadeType.REFRESH,
 			CascadeType.MERGE }, orphanRemoval = false, fetch = FetchType.LAZY)
@@ -63,7 +54,18 @@ public class Cobro implements Serializable {
 	@JsonIgnoreProperties(value = { "cobro", "abonos" })
 	private List<Liquidacion> liquidaciones = new ArrayList<Liquidacion>();
 
-	// ############# Helper Methods #############
+	// ====================== Constructors =======================
+
+	public Cobro() {
+	}
+
+	public Cobro(String nombre) {
+		this.nombre = nombre;
+	}
+
+	// ====================== Entity's Life Cycle ===================
+
+	// ====================== Helper Methods ======================
 
 	public void setCobrador(Cobrador c) {
 		if (c == null) {
@@ -76,13 +78,9 @@ public class Cobro implements Serializable {
 		this.cobrador = c;
 	}
 
-	public Cobrador getCobrador() {
-		return this.cobrador;
-	}
-
 	public void addCliente(Cliente c) {
-		this.clientes.add(c);
 		c.setCobro(this);
+		this.clientes.add(c);
 	}
 
 	public void removeCliente(Cliente c) {
@@ -100,7 +98,11 @@ public class Cobro implements Serializable {
 		l.setCobro(null);
 	}
 
-	// #######################################
+	// ====================== Getters and Setters ======================
+
+	public Cobrador getCobrador() {
+		return this.cobrador;
+	}
 
 	public Integer getTotal() {
 		if (this.total == null)
@@ -150,6 +152,11 @@ public class Cobro implements Serializable {
 
 	public void setLiquidaciones(List<Liquidacion> liquidaciones) {
 		this.liquidaciones = liquidaciones;
+	}
+
+	@Override
+	public String toString() {
+		return "{" + " id='" + getId() + "'" + ", nombre='" + getNombre() + "'" + ", total='" + getTotal() + "'" + "}";
 	}
 
 	private static final long serialVersionUID = 1L;

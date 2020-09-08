@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 import com.empresa.creditos.entity.credito.Credito;
@@ -18,22 +19,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name = "abonos")
 public class Abono implements Serializable {
 
-	public Abono() {
-	}
-
-	public Abono(Liquidacion liquidacion, Credito credito, int abono) {
-		this.liquidacion = liquidacion;
-		this.credito = credito;
-		this.abono = abono;
-	}
-
-	public Abono(int abono) {
-		super();
-		this.abono = abono;
-	}
-
 	@EmbeddedId
 	private AbonoId id = new AbonoId();
+
+	@Column(nullable = false)
+	private int abono;
+
+	// ====================== Entity's Relationships ======================
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@MapsId("liquidacionId")
@@ -45,18 +37,31 @@ public class Abono implements Serializable {
 	@JsonIgnoreProperties(value = { "cobro", "cliente", "abonos", "cobrador", "hibernateLazyInitializer" })
 	private Credito credito;
 
-	@Column(nullable = false)
-	private int abono;
+	// ====================== Constructors =======================
 
-	// ############# Entity's life cycle #################
+	public Abono() {
+	}
 
-	// @PrePersist
-	// public void prePersist() {
-	// }
+	public Abono(Credito credito, int abono) {
+		this.credito = credito;
+		this.abono = abono;
+	}
 
-	// ############## Helper Methods ####################
+	public Abono(AbonoId id, int abono) {
+		this.id = id;
+		this.abono = abono;
+	}
 
-	// ################# Getters and Setters ################
+	// ====================== Entity's Life Cycle ===================
+
+	@PrePersist
+	public void prePersist() {
+		this.credito.setSaldo(this.credito.getSaldo() - this.abono);
+	}
+
+	// ====================== Helper Methods ====================
+
+	// ====================== Getters and Setters ====================
 
 	public AbonoId getId() {
 		return id;
@@ -87,6 +92,9 @@ public class Abono implements Serializable {
 	}
 
 	public void setAbono(int abono) {
+		if (this.credito.getSaldo() - abono < 0) {
+			throw new IllegalArgumentException();
+		}
 		this.abono = abono;
 	}
 

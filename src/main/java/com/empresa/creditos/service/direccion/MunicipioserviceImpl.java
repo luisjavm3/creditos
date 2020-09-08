@@ -16,14 +16,29 @@ public class MunicipioserviceImpl implements IMunicipioService{
 	
 	@Override
 	public Municipio save(Municipio municipio) {
-
 		return this.municipioDao.save(municipio);
 	}
 
 	@Override
 	public List<Municipio> findAll() {
-
 		return this.municipioDao.findAll();
+	}
+
+	@Override
+	public Municipio findByNombre(String nombre) {
+		return municipioDao.findByNombre(nombre);
+	}
+
+	@Override
+	public void delete(Municipio municipio) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void deleteById(int id) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

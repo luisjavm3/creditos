@@ -20,18 +20,18 @@ public class CobroRestController {
 	@Autowired
 	private ICobroService cobroService;
 
-	@PostMapping("/cobros")
-	public Cobro save(@RequestBody Cobro cobro) {
-		return this.cobroService.save(cobro);
-	}
-
 	@GetMapping("/cobros")
 	public List<Cobro> findAll() {
 		return this.cobroService.findAll();
 	}
 
+	@PostMapping("/cobros")
+	public Cobro save(@RequestBody Cobro cobro) {
+		return this.cobroService.save(cobro);
+	}
+
 	@GetMapping("/cobros/{id}")
-	public Cobro findById(@PathVariable("id") int id){
+	public Cobro findById(@PathVariable("id") int id) {
 		return this.cobroService.findById(id);
 	}
 

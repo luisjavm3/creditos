@@ -10,6 +10,8 @@ public interface IMunicipioDao extends CrudRepository<Municipio, Integer>{
 	
 	Municipio save(Municipio municipio);
 	
+	Municipio findByNombre(String nombre);
+
 	void delete(Municipio municipio);
 	
 	void deleteById(int id);

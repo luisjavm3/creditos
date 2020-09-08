@@ -22,14 +22,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name = "municipios")
 public class Municipio implements Serializable {
 
-	public Municipio() {
-	}
-
-	public Municipio(Departamento departamento, String nombre) {
-		this.departamento = departamento;
-		this.nombre = nombre;
-	}
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
@@ -46,6 +38,14 @@ public class Municipio implements Serializable {
 	@JsonIgnoreProperties(value = { "municipio" })
 	private List<Barrio> barrios = new ArrayList<>();
 
+	// ============== Contructors ===================
+
+	public Municipio() {
+	}
+
+	public Municipio(String nombre) {
+		this.nombre = nombre;
+	}
 	// ########## Helper Methods ###################
 
 	public void addBarrio(Barrio b) {
@@ -92,25 +92,10 @@ public class Municipio implements Serializable {
 		this.barrios = barrios;
 	}
 
-	// @Override
-	// public boolean equals(Object o) {
-
-	// if (o == this)
-	// return true;
-
-	// if (!(o instanceof Municipio) || o == null)
-	// return false;
-
-	// Municipio that = (Municipio) o;
-
-	// return Objects.equals(that.id, id);
-	// }
-
-	// @Override
-	// public int hashCode() {
-
-	// return 31;
-	// }
+	@Override
+	public String toString() {
+		return "{" + " id='" + getId() + "'" + ", nombre='" + getNombre() + "'" + "}";
+	}
 
 	private static final long serialVersionUID = 1L;
 }

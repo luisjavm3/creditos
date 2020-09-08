@@ -8,6 +8,12 @@ public interface IMunicipioService {
 
 	Municipio save(Municipio municipio);
 	
+	Municipio findByNombre(String nombre);
+
+	void delete(Municipio municipio);
+	
+	void deleteById(int id);
+	
 	List<Municipio> findAll();
 	
 }

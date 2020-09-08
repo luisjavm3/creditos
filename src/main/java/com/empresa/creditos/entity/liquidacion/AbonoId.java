@@ -19,6 +19,8 @@ public class AbonoId implements Serializable {
 		return liquidacionId;
 	}
 
+	// ====================== Getters and Setters ======================
+
 	public void setLiquidacionId(int liquidacionId) {
 		this.liquidacionId = liquidacionId;
 	}

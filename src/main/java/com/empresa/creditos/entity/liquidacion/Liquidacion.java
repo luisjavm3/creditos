@@ -15,23 +15,26 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-
-import org.hibernate.annotations.Formula;
+import javax.persistence.UniqueConstraint;
 
 import com.empresa.creditos.entity.Cobro;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import org.hibernate.annotations.Formula;
+
 @Entity
-@Table(name = "liquidaciones")
+@Table(name = "liquidaciones", uniqueConstraints = @UniqueConstraint(columnNames = { "fecha_liquidacion", "cobro_id" }))
 public class Liquidacion implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
+	@Temporal(TemporalType.DATE)
 	@Column(name = "fecha_liquidacion", nullable = false, updatable = false)
 	private Date fechaLiquidacion;
 
@@ -47,7 +50,9 @@ public class Liquidacion implements Serializable {
 	@Formula(value = "SELECT SUM(c.boleta) FROM creditos c WHERE c.fecha_credito = fecha_liquidacion AND c.cobro_id = cobro_id")
 	private Integer totalBoletas;
 
-	@Formula(value = "SELECT SUM(c.total) FROM creditos c WHERE c.fecha_credito = fecha_liquidacion AND c.cobro_id = cobro_id")
+	// @Formula(value = "SELECT SUM(c.credito) FROM creditos c WHERE c.fecha_credito
+	// = fecha_liquidacion AND c.cobro_id = cobro_id")
+	@Formula(value = "SELECT SUM(c.credito) FROM creditos c WHERE c.fecha_credito = fecha_liquidacion AND c.cobro_id = cobro_id")
 	private Integer totalCreditos;
 
 	@Column(nullable = false)
@@ -56,13 +61,14 @@ public class Liquidacion implements Serializable {
 	@Column(nullable = true)
 	private String nota;
 
+	// @JsonIgnore
 	@Transient
 	private int resultado;
 
-	// #####
+	// ====================== Entity's Relationships ======================
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "cobro_id", referencedColumnName = "id")
+	@JoinColumn(name = "cobro_id", referencedColumnName = "id", nullable = false)
 	@JsonIgnoreProperties(value = { "clientes", "creditos", "liquidaciones", "hibernateLazyInitializer" })
 	private Cobro cobro;
 
@@ -70,17 +76,38 @@ public class Liquidacion implements Serializable {
 	@JsonIgnoreProperties(value = { "id", "liquidacion" })
 	private List<Abono> abonos = new ArrayList<Abono>();
 
-	// ########## Enity's life cycle ############
+	// ====================== Constructors =======================
 
-	@PrePersist
-	public void init() {
-		this.fechaLiquidacion = new Date();
+	public Liquidacion() {
 	}
 
-	// ############### Helpers Methods ###################
+	public Liquidacion(int efectivo, int base, int gastos, String nota) {
+		this.efectivo = efectivo;
+		this.base = base;
+		this.gastos = gastos;
+		this.nota = nota;
+	}
+
+	public Liquidacion(Date fechaLiquidacion, int efectivo, int base, int gastos, String nota) {
+		this.fechaLiquidacion = fechaLiquidacion;
+		this.efectivo = efectivo;
+		this.base = base;
+		this.gastos = gastos;
+		this.nota = nota;
+	}
+
+	// ====================== Entity's Life Cycle ===================
+
+	// @PrePersist
+	// public void init() {
+	// this.fechaLiquidacion = new Date();
+	// }
+
+	// ====================== Helper Methods ======================
 
 	public void addAbono(Abono a) {
 		a.setLiquidacion(this);
+		// a.setCredito(credito);
 		this.abonos.add(a);
 	}
 
@@ -89,7 +116,7 @@ public class Liquidacion implements Serializable {
 		this.abonos.remove(a);
 	}
 
-	// ############### Getters and Setters ##################
+	// ====================== Getters and Setters ======================
 
 	public int getCobrado() {
 		if (cobrado == null)
@@ -122,8 +149,9 @@ public class Liquidacion implements Serializable {
 	}
 
 	public int getResultado() {
-		// return resultado;
-		return efectivo - cobrado - base - totalBoletas + totalCreditos + gastos;
+		this.resultado = getEfectivo() - getCobrado() - getBase() - getTotalBoletas() + getTotalCreditos()
+				+ getGastos();
+		return this.resultado;
 	}
 
 	public void setResultado(int resultado) {

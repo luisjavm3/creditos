@@ -8,6 +8,14 @@ public interface IClienteService {
 
 	Cliente save(Cliente cliente);
 	
+	Cliente findById(int id);
+
+	Cliente findByCedula(int cedula);
+
+	void deleteById(int id);
+	
+	void delete(Cliente credito);
+	
 	List<Cliente> findAll();
 	
 }

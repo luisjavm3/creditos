@@ -10,7 +10,9 @@ public interface ICreditoDao extends CrudRepository<Credito, Integer>{
 	
 	Credito save(Credito credito);
 	
-//	void deleteById(int id);
+	Credito findById(int id);
+
+	void deleteById(int id);
 	
 	void delete(Credito credito);
 	

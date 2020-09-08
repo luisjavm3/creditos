@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -21,9 +20,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-
-import org.hibernate.annotations.Formula;
-import org.hibernate.annotations.Where;
+import javax.persistence.UniqueConstraint;
 
 import com.empresa.creditos.entity.Cliente;
 import com.empresa.creditos.entity.Cobrador;
@@ -31,30 +28,21 @@ import com.empresa.creditos.entity.Cobro;
 import com.empresa.creditos.entity.liquidacion.Abono;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import org.hibernate.annotations.Formula;
+import org.hibernate.annotations.Where;
+
 @Entity
-@Table(name = "creditos")
+@Table(name = "creditos", uniqueConstraints = @UniqueConstraint(columnNames = { "cobro_id", "posicion_ruta" }))
 @Where(clause = "cancelado = false")
 public class Credito implements Serializable {
-
-	public Credito() {
-	}
-
-	public Credito(Cliente cliente, Cobrador cobrador, int credito, Interes interes, Perioricidad perioricidad,
-			Plazo plazo) {
-		this.cliente = cliente;
-		this.cobrador = cobrador;
-		this.credito = credito;
-		this.interes = interes;
-		this.perioricidad = perioricidad;
-		this.plazo = plazo;
-	}
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "fecha_prestamo", nullable = false)
+	// This field must be updatable = false
+	@Temporal(TemporalType.DATE)
+	@Column(name = "fecha_credito", nullable = false)
 	private Date fechaCredito;
 
 	@Temporal(TemporalType.TIMESTAMP)
@@ -74,14 +62,13 @@ public class Credito implements Serializable {
 	@Formula(value = "SELECT SUM(a.abono) FROM abonos a WHERE a.credito_id = id")
 	private Integer totalAbonos;
 
-	// @Formula(value = "SELECT sum(a.abono) FROM abonos a WHERE a.credito_id = id")
-	// private Integer saldo;
+	private Integer saldo;
 
 	private int boleta;
 
 	private int total;
 
-	// #####
+	// ====================== Entity's Relationships ======================
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cobro_id", nullable = false)
@@ -117,19 +104,33 @@ public class Credito implements Serializable {
 	@JsonIgnoreProperties(value = { "hibernateLazyInitializer" })
 	private Plazo plazo;
 
-	// ############## Entity's Life Cycle ###############
+	// ====================== Constructors =======================
 
-	@PrePersist
-	public void asignarValoresAutomaticamente() {
-		this.fechaCredito = new Date();
-		this.fechaCancelado = null;
-		this.cancelado = false;
-		this.total = this.credito * (100 + this.interes.getInteres()) / 100;
-		// this.saldo = total;
-		this.cuota = this.total / this.plazo.getPlazo();
+	public Credito() {
 	}
 
-	// ############### Helper Methods #################
+	public Credito(int credito, int posicionEnRuta, int boleta, Interes interes, Perioricidad perioricidad,
+			Plazo plazo) {
+		this.credito = credito;
+		this.posicionEnRuta = posicionEnRuta;
+		this.boleta = boleta;
+		this.interes = interes;
+		this.perioricidad = perioricidad;
+		this.plazo = plazo;
+	}
+
+	// ====================== Entity's Life Cycle ===================
+
+	@PrePersist
+	public void prePersist() {
+		this.fechaCredito = new Date();
+		this.cancelado = false;
+		this.total = this.credito * (100 + this.interes.getInteres()) / 100;
+		this.cuota = this.total / this.plazo.getPlazo();
+		this.saldo = total;
+	}
+
+	// ====================== Helper Methods ======================
 
 	public void addAbono(Abono a) {
 		a.setCredito(this);
@@ -141,10 +142,9 @@ public class Credito implements Serializable {
 		this.abonos.remove(a);
 	}
 
-	// ################# Getters and Setters #################
+	// ====================== Getters and Setters ======================
 
 	public void setCobrador(Cobrador c) {
-		// c.getCreditos().add(this);
 		this.cobrador = c;
 	}
 
@@ -282,13 +282,15 @@ public class Credito implements Serializable {
 		this.plazo = plazo;
 	}
 
-	// public Integer getSaldo() {
-	// return saldo;
-	// }
+	public Integer getSaldo() {
+		if (this.saldo == null)
+			return 0;
+		return this.saldo;
+	}
 
-	// public void setSaldo(Integer saldo) {
-	// this.saldo = saldo;
-	// }
+	public void setSaldo(Integer saldo) {
+		this.saldo = saldo;
+	}
 
 	private static final long serialVersionUID = 1L;
 }
