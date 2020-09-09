@@ -1,6 +1,7 @@
 package com.empresa.creditos.entity.liquidacion;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -55,8 +56,21 @@ public class Abono implements Serializable {
 	// ====================== Entity's Life Cycle ===================
 
 	@PrePersist
-	public void prePersist() {
-		this.credito.setSaldo(this.credito.getSaldo() - this.abono);
+	public void prePersist() throws Exception {
+
+		int saldoMenosAbono = credito.getSaldo() - abono;
+
+		if (saldoMenosAbono == 0) {
+			credito.setSaldo(0);
+			credito.setCancelado(true);
+			credito.setFechaCancelado(new Date());
+			credito.setPosicionEnRuta(null);
+		} else if (saldoMenosAbono > 0) {
+			credito.setSaldo(saldoMenosAbono);
+		} else {
+			throw new Exception("El abono a realizar no debe ser mayor que el saldo restante.");
+		}
+
 	}
 
 	// ====================== Helper Methods ====================

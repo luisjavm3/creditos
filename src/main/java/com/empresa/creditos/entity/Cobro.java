@@ -14,6 +14,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.empresa.creditos.entity.credito.Credito;
 import com.empresa.creditos.entity.liquidacion.Liquidacion;
@@ -33,8 +34,9 @@ public class Cobro implements Serializable {
 	@NaturalId
 	private String nombre;
 
-	@Formula(value = "SELECT COUNT(c.cobro_id) FROM creditos c WHERE c.cobro_id = id")
-	private int numeroDeCreditos;
+	// // @Transient
+	// @Formula(value = "SELECT COUNT(c.cobro_id) FROM creditos c WHERE c.cobro_id = id")
+	// private int numeroDeCreditos;
 
 	@Formula(value = "SELECT SUM(c.saldo) FROM creditos c WHERE c.cobro_id =  id")
 	private Integer total;

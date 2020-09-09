@@ -564,7 +564,7 @@ public class TestData {
 		Abono abono7 = new Abono(credito7, 70);
 		Abono abono8 = new Abono(credito8, 80);
 		Abono abono9 = new Abono(credito9, 90);
-		Abono abono10 = new Abono(credito10, 100);
+		Abono abono10 = new Abono(credito10, 110);
 
 		liquidacion.addAbono(abono1);
 		liquidacion.addAbono(abono2);

@@ -17,6 +17,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PostRemove;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -48,7 +49,7 @@ public class Credito implements Serializable {
 	@Column(name = "fecha_credito", nullable = false)
 	private Date fechaCredito;
 
-	@Temporal(TemporalType.TIMESTAMP)
+	@Temporal(TemporalType.DATE)
 	@Column(name = "fecha_cancelado")
 	private Date fechaCancelado;
 
@@ -56,7 +57,7 @@ public class Credito implements Serializable {
 	private int credito;
 
 	@Column(name = "posicion_ruta")
-	private int posicionEnRuta;
+	private Integer posicionEnRuta;
 
 	private boolean cancelado;
 
@@ -172,6 +173,25 @@ public class Credito implements Serializable {
 
 	}
 
+	@PostRemove
+	public void postRemove() {
+
+		int numeroCreditos = cobro.getNumeroDeCreditos();
+
+		if (this.posicionEnRuta <= numeroCreditos) {
+
+			List<Credito> creditos = cobro.getCreditos();
+			int puntoDeInicio = this.posicionEnRuta - 1;
+
+			for (int i = puntoDeInicio; i < numeroCreditos; i++) {
+				Credito credito = creditos.get(i);
+				credito.setPosicionEnRuta(credito.getPosicionEnRuta() - 1);
+			}
+
+		}
+
+	}
+
 	// ====================== Helper Methods ======================
 
 	public void addAbono(Abono a) {
@@ -253,10 +273,12 @@ public class Credito implements Serializable {
 	}
 
 	public int getPosicionEnRuta() {
+		if (posicionEnRuta == null)
+			return 0;
 		return posicionEnRuta;
 	}
 
-	public void setPosicionEnRuta(int posicionEnRuta) {
+	public void setPosicionEnRuta(Integer posicionEnRuta) {
 		this.posicionEnRuta = posicionEnRuta;
 	}
 
