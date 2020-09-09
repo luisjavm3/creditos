@@ -12,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 
 import com.empresa.creditos.entity.credito.Credito;
@@ -32,6 +33,9 @@ public class Cobro implements Serializable {
 	@NaturalId
 	private String nombre;
 
+	@Formula(value = "SELECT COUNT(c.cobro_id) FROM creditos c WHERE c.cobro_id = id")
+	private int numeroDeCreditos;
+
 	@Formula(value = "SELECT SUM(c.saldo) FROM creditos c WHERE c.cobro_id =  id")
 	private Integer total;
 
@@ -48,6 +52,7 @@ public class Cobro implements Serializable {
 
 	@OneToMany(mappedBy = "cobro", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnoreProperties(value = { "cobro", "abonos", "cliente", "cobrador" })
+	@OrderBy("posicionEnRuta")
 	private List<Credito> creditos = new ArrayList<Credito>();
 
 	@OneToMany(mappedBy = "cobro", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -154,9 +159,18 @@ public class Cobro implements Serializable {
 		this.liquidaciones = liquidaciones;
 	}
 
+	public int getNumeroDeCreditos() {
+		return this.numeroDeCreditos;
+	}
+
+	public void setNumeroDeCreditos(int numeroDeCreditos) {
+		this.numeroDeCreditos = numeroDeCreditos;
+	}
+
 	@Override
 	public String toString() {
-		return "{" + " id='" + getId() + "'" + ", nombre='" + getNombre() + "'" + ", total='" + getTotal() + "'" + "}";
+		return "{" + " id='" + getId() + "'" + ", nombre='" + getNombre() + "'" + ", numeroDeCreditos='"
+				+ getNumeroDeCreditos() + "'" + ", total='" + getTotal() + "'" + "}";
 	}
 
 	private static final long serialVersionUID = 1L;

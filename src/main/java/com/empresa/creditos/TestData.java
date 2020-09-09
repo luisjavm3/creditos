@@ -424,16 +424,17 @@ public class TestData {
 		cliente9.setCobro(cobro);
 		cliente10.setCobro(cobro);
 
-		Credito credito1 = new Credito(100, 1, 1, interes, perioricidad, plazo);
-		Credito credito2 = new Credito(100, 2, 2, interes, perioricidad, plazo);
-		Credito credito3 = new Credito(100, 3, 3, interes, perioricidad, plazo);
-		Credito credito4 = new Credito(100, 4, 4, interes, perioricidad, plazo);
-		Credito credito5 = new Credito(100, 5, 5, interes, perioricidad, plazo);
-		Credito credito6 = new Credito(100, 6, 6, interes, perioricidad, plazo);
-		Credito credito7 = new Credito(100, 7, 7, interes, perioricidad, plazo);
-		Credito credito8 = new Credito(100, 8, 8, interes, perioricidad, plazo);
-		Credito credito9 = new Credito(100, 9, 9, interes, perioricidad, plazo);
-		Credito credito10 = new Credito(100, 10, 10, interes, perioricidad, plazo);
+		Credito credito1 = new Credito(100, 1, interes, perioricidad, plazo);
+		Credito credito2 = new Credito(100, 2, interes, perioricidad, plazo);
+		Credito credito3 = new Credito(100, 3, interes, perioricidad, plazo);
+		Credito credito4 = new Credito(100, 4, interes, perioricidad, plazo);
+		Credito credito5 = new Credito(100, 5, interes, perioricidad, plazo);
+		Credito credito6 = new Credito(100, 6, interes, perioricidad, plazo);
+		Credito credito7 = new Credito(100, 7, interes, perioricidad, plazo);
+		Credito credito8 = new Credito(100, 8, interes, perioricidad, plazo);
+		Credito credito9 = new Credito(100, 9, interes, perioricidad, plazo);
+		Credito credito10 = new Credito(100, 5, 10, interes, perioricidad, plazo);
+
 		cliente1.setCredito(credito1);
 		cliente2.setCredito(credito2);
 		cliente3.setCredito(credito3);

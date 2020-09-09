@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.empresa.creditos.entity.Cobro;
+import com.empresa.creditos.entity.credito.Credito;
 import com.empresa.creditos.service.ICobroService;
 
 @RestController
@@ -33,6 +34,11 @@ public class CobroRestController {
 	@GetMapping("/cobros/{id}")
 	public Cobro findById(@PathVariable("id") int id) {
 		return this.cobroService.findById(id);
+	}
+
+	@GetMapping("/cobros/{id}/creditos")
+	public List<Credito> showOnlyItsCredits(@PathVariable("id") int id) {
+		return cobroService.findById(id).getCreditos();
 	}
 
 }

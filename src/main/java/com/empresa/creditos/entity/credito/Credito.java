@@ -2,6 +2,7 @@ package com.empresa.creditos.entity.credito;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -32,7 +33,9 @@ import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.Where;
 
 @Entity
-@Table(name = "creditos", uniqueConstraints = @UniqueConstraint(columnNames = { "cobro_id", "posicion_ruta" }))
+@Table(name = "creditos")
+// @Table(name = "creditos", uniqueConstraints = @UniqueConstraint(columnNames =
+// { "cobro_id", "posicion_ruta" }))
 @Where(clause = "cancelado = false")
 public class Credito implements Serializable {
 
@@ -40,7 +43,7 @@ public class Credito implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
-	// This field must be updatable = false
+	// This field must be: updatable = false
 	@Temporal(TemporalType.DATE)
 	@Column(name = "fecha_credito", nullable = false)
 	private Date fechaCredito;
@@ -119,15 +122,54 @@ public class Credito implements Serializable {
 		this.plazo = plazo;
 	}
 
+	public Credito(int credito, int boleta, Interes interes, Perioricidad perioricidad, Plazo plazo) {
+		this.credito = credito;
+		this.boleta = boleta;
+		this.interes = interes;
+		this.perioricidad = perioricidad;
+		this.plazo = plazo;
+		this.posicionEnRuta = 0;
+	}
+
 	// ====================== Entity's Life Cycle ===================
 
 	@PrePersist
 	public void prePersist() {
-		this.fechaCredito = new Date();
-		this.cancelado = false;
-		this.total = this.credito * (100 + this.interes.getInteres()) / 100;
-		this.cuota = this.total / this.plazo.getPlazo();
-		this.saldo = total;
+
+		fechaCredito = new Date();
+		cancelado = false;
+		total = credito * (100 + interes.getInteres()) / 100;
+		cuota = total / plazo.getPlazo();
+		saldo = total;
+
+		int numeroDeCreditos = cobro.getNumeroDeCreditos();
+
+		// Si el cobro tiene creditos activos
+		if (numeroDeCreditos != 0) {
+
+			if (posicionEnRuta <= numeroDeCreditos && posicionEnRuta > 0) {
+
+				List<Credito> creditos = cobro.getCreditos();
+				Collections.reverse(creditos);
+
+				int recorrerHasta = numeroDeCreditos - posicionEnRuta + 1;
+
+				for (int i = 0; i < recorrerHasta; i++) {
+					Credito credito = creditos.get(i);
+					credito.setPosicionEnRuta(credito.getPosicionEnRuta() + 1);
+				}
+
+			} else {
+				// si posicionEnRuta viene inicializada en cero o es mayor al # de creditos
+				// activos del cobro, se le asigna la ultima posicion de la ruta
+				posicionEnRuta = numeroDeCreditos + 1;
+			}
+
+		} else {
+			// Si el cobro no tiene creditos, asigna al credito la posicion 1 en ruta
+			posicionEnRuta = 1;
+		}
+
 	}
 
 	// ====================== Helper Methods ======================
