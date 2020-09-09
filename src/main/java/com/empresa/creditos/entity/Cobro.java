@@ -34,9 +34,9 @@ public class Cobro implements Serializable {
 	@NaturalId
 	private String nombre;
 
-	// // @Transient
-	// @Formula(value = "SELECT COUNT(c.cobro_id) FROM creditos c WHERE c.cobro_id = id")
-	// private int numeroDeCreditos;
+	// @Transient
+	@Formula(value = "SELECT COUNT(c.cobro_id) FROM creditos c WHERE c.cobro_id = id")
+	private int numeroDeCreditos;
 
 	@Formula(value = "SELECT SUM(c.saldo) FROM creditos c WHERE c.cobro_id =  id")
 	private Integer total;
