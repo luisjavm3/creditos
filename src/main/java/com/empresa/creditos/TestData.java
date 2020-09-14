@@ -329,8 +329,6 @@ public class TestData {
 
 		try {
 			cobro = cobroService.findById(1);
-			System.out.println("===== " + cobro.getId() + " " + cobro.getNombre() + " =====");
-			System.out.println("TestData.insertarClientesDePrueba()");
 		} catch (Exception e) {
 			System.err.println("============== ERROR ==============");
 			System.out.println("TestData.insertarClientesDePrueba()");

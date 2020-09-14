@@ -9,6 +9,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -17,12 +18,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.PostRemove;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceContexts;
+import javax.persistence.PostLoad;
+import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.Transient;
 
 import com.empresa.creditos.entity.Cliente;
 import com.empresa.creditos.entity.Cobrador;
@@ -72,6 +76,12 @@ public class Credito implements Serializable {
 
 	private int total;
 
+	@Transient
+	@JsonIgnoreProperties(value = { "fechaCredito", "fechaCancelado", "credito", "cancelado", "cuota", "totalAbonos",
+			"saldo", "boleta", "total", "cobro", "cliente", "abonos", "cobrador", "interes", "perioricidad", "plazo",
+			"saveCredito" })
+	private transient Credito savedCredito;
+
 	// ====================== Entity's Relationships ======================
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -113,8 +123,13 @@ public class Credito implements Serializable {
 	public Credito() {
 	}
 
-	public Credito(int credito, int posicionEnRuta, int boleta, Interes interes, Perioricidad perioricidad,
-			Plazo plazo) {
+	public Credito(final Credito credito) {
+		this.id = credito.getId();
+		this.posicionEnRuta = credito.getPosicionEnRuta();
+	}
+
+	public Credito(final int credito, final int posicionEnRuta, final int boleta, final Interes interes,
+			final Perioricidad perioricidad, final Plazo plazo) {
 		this.credito = credito;
 		this.posicionEnRuta = posicionEnRuta;
 		this.boleta = boleta;
@@ -123,7 +138,8 @@ public class Credito implements Serializable {
 		this.plazo = plazo;
 	}
 
-	public Credito(int credito, int boleta, Interes interes, Perioricidad perioricidad, Plazo plazo) {
+	public Credito(final int credito, final int boleta, final Interes interes, final Perioricidad perioricidad,
+			final Plazo plazo) {
 		this.credito = credito;
 		this.boleta = boleta;
 		this.interes = interes;
@@ -134,6 +150,14 @@ public class Credito implements Serializable {
 
 	// ====================== Entity's Life Cycle ===================
 
+	@PostLoad
+	public void postLoad() {
+
+		// System.out.println("=== POSTLOAD === : " + this.toString());
+		setSavedCredito(new Credito(this));
+
+	}
+
 	@PrePersist
 	public void prePersist() {
 
@@ -143,20 +167,20 @@ public class Credito implements Serializable {
 		cuota = total / plazo.getPlazo();
 		saldo = total;
 
-		int numeroDeCreditos = cobro.getNumeroDeCreditos();
+		final int numeroDeCreditos = cobro.getNumeroDeCreditos();
 
 		// Si el cobro tiene creditos activos
 		if (numeroDeCreditos != 0) {
 
 			if (posicionEnRuta <= numeroDeCreditos && posicionEnRuta > 0) {
 
-				List<Credito> creditos = cobro.getCreditos();
+				final List<Credito> creditos = cobro.getCreditos();
 				Collections.reverse(creditos);
 
-				int recorrerHasta = numeroDeCreditos - posicionEnRuta + 1;
+				final int recorrerHasta = numeroDeCreditos - posicionEnRuta + 1;
 
 				for (int i = 0; i < recorrerHasta; i++) {
-					Credito credito = creditos.get(i);
+					final Credito credito = creditos.get(i);
 					credito.setPosicionEnRuta(credito.getPosicionEnRuta() + 1);
 				}
 
@@ -173,19 +197,27 @@ public class Credito implements Serializable {
 
 	}
 
-	@PostRemove
-	public void postRemove() {
+	@PostUpdate
+	public void postUpdate() {
 
-		int numeroCreditos = cobro.getNumeroDeCreditos();
+		if (cancelado) {
 
-		if (this.posicionEnRuta <= numeroCreditos) {
+			final int numeroCreditos = cobro.getNumeroDeCreditos();
+			final int rutaAnterior = this.getSavedCredito().getPosicionEnRuta();
 
-			List<Credito> creditos = cobro.getCreditos();
-			int puntoDeInicio = this.posicionEnRuta - 1;
+			if (rutaAnterior <= numeroCreditos) {
 
-			for (int i = puntoDeInicio; i < numeroCreditos; i++) {
-				Credito credito = creditos.get(i);
-				credito.setPosicionEnRuta(credito.getPosicionEnRuta() - 1);
+				final List<Credito> creditos = cobro.getCreditos();
+				final int puntoDeInicio = rutaAnterior - 1;
+
+				for (int i = puntoDeInicio; i < numeroCreditos; i++) {
+
+					final Credito credito = creditos.get(i);
+					credito.setPosicionEnRuta(credito.getPosicionEnRuta() - 1);
+
+					System.out.println(credito.toString());
+				}
+
 			}
 
 		}
@@ -194,19 +226,19 @@ public class Credito implements Serializable {
 
 	// ====================== Helper Methods ======================
 
-	public void addAbono(Abono a) {
+	public void addAbono(final Abono a) {
 		a.setCredito(this);
 		this.abonos.add(a);
 	}
 
-	public void removeAbono(Abono a) {
+	public void removeAbono(final Abono a) {
 		a.setCredito(null);
 		this.abonos.remove(a);
 	}
 
 	// ====================== Getters and Setters ======================
 
-	public void setCobrador(Cobrador c) {
+	public void setCobrador(final Cobrador c) {
 		this.cobrador = c;
 	}
 
@@ -220,7 +252,7 @@ public class Credito implements Serializable {
 		return totalAbonos;
 	}
 
-	public void setTotalAbonos(Integer totalAbonos) {
+	public void setTotalAbonos(final Integer totalAbonos) {
 		this.totalAbonos = totalAbonos;
 	}
 
@@ -228,7 +260,7 @@ public class Credito implements Serializable {
 		return abonos;
 	}
 
-	public void setAbonos(List<Abono> abonos) {
+	public void setAbonos(final List<Abono> abonos) {
 		this.abonos = abonos;
 	}
 
@@ -236,7 +268,7 @@ public class Credito implements Serializable {
 		return cancelado;
 	}
 
-	public void setCancelado(boolean cancelado) {
+	public void setCancelado(final boolean cancelado) {
 		this.cancelado = cancelado;
 	}
 
@@ -244,7 +276,7 @@ public class Credito implements Serializable {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(final int id) {
 		this.id = id;
 	}
 
@@ -252,7 +284,7 @@ public class Credito implements Serializable {
 		return fechaCredito;
 	}
 
-	public void setFechaCredito(Date fechaCredito) {
+	public void setFechaCredito(final Date fechaCredito) {
 		this.fechaCredito = fechaCredito;
 	}
 
@@ -260,7 +292,7 @@ public class Credito implements Serializable {
 		return fechaCancelado;
 	}
 
-	public void setFechaCancelado(Date fechaCancelado) {
+	public void setFechaCancelado(final Date fechaCancelado) {
 		this.fechaCancelado = fechaCancelado;
 	}
 
@@ -268,17 +300,17 @@ public class Credito implements Serializable {
 		return credito;
 	}
 
-	public void setCredito(int credito) {
+	public void setCredito(final int credito) {
 		this.credito = credito;
 	}
 
 	public int getPosicionEnRuta() {
-		if (posicionEnRuta == null)
+		if (this.posicionEnRuta == null)
 			return 0;
-		return posicionEnRuta;
+		return this.posicionEnRuta;
 	}
 
-	public void setPosicionEnRuta(Integer posicionEnRuta) {
+	public void setPosicionEnRuta(final Integer posicionEnRuta) {
 		this.posicionEnRuta = posicionEnRuta;
 	}
 
@@ -286,7 +318,7 @@ public class Credito implements Serializable {
 		return cuota;
 	}
 
-	public void setCuota(float cuota) {
+	public void setCuota(final float cuota) {
 		this.cuota = cuota;
 	}
 
@@ -294,7 +326,7 @@ public class Credito implements Serializable {
 		return boleta;
 	}
 
-	public void setBoleta(int boleta) {
+	public void setBoleta(final int boleta) {
 		this.boleta = boleta;
 	}
 
@@ -302,7 +334,7 @@ public class Credito implements Serializable {
 		return total;
 	}
 
-	public void setTotal(int total) {
+	public void setTotal(final int total) {
 		this.total = total;
 	}
 
@@ -310,7 +342,7 @@ public class Credito implements Serializable {
 		return cliente;
 	}
 
-	public void setCliente(Cliente cliente) {
+	public void setCliente(final Cliente cliente) {
 		this.cliente = cliente;
 	}
 
@@ -318,7 +350,7 @@ public class Credito implements Serializable {
 		return cobro;
 	}
 
-	public void setCobro(Cobro cobro) {
+	public void setCobro(final Cobro cobro) {
 		this.cobro = cobro;
 	}
 
@@ -326,7 +358,7 @@ public class Credito implements Serializable {
 		return interes;
 	}
 
-	public void setInteres(Interes interes) {
+	public void setInteres(final Interes interes) {
 		this.interes = interes;
 	}
 
@@ -334,7 +366,7 @@ public class Credito implements Serializable {
 		return perioricidad;
 	}
 
-	public void setPerioricidad(Perioricidad perioricidad) {
+	public void setPerioricidad(final Perioricidad perioricidad) {
 		this.perioricidad = perioricidad;
 	}
 
@@ -342,7 +374,7 @@ public class Credito implements Serializable {
 		return plazo;
 	}
 
-	public void setPlazo(Plazo plazo) {
+	public void setPlazo(final Plazo plazo) {
 		this.plazo = plazo;
 	}
 
@@ -352,8 +384,25 @@ public class Credito implements Serializable {
 		return this.saldo;
 	}
 
-	public void setSaldo(Integer saldo) {
+	public void setSaldo(final Integer saldo) {
 		this.saldo = saldo;
+	}
+
+	public Credito getSavedCredito() {
+		return this.savedCredito;
+	}
+
+	public void setSavedCredito(final Credito credito) {
+		this.savedCredito = credito;
+	}
+
+	@Override
+	public String toString() {
+		return "{" + " id='" + getId() + "'" + ", fechaCredito='" + getFechaCredito() + "'" + ", fechaCancelado='"
+				+ getFechaCancelado() + "'" + ", credito='" + getCredito() + "'" + ", posicionEnRuta='"
+				+ getPosicionEnRuta() + "'" + ", cancelado='" + isCancelado() + "'" + ", cuota='" + getCuota() + "'"
+				+ ", saldo='" + getSaldo() + "'" + ", boleta='" + getBoleta() + "'" + ", total='" + getTotal() + "'"
+				+ "}";
 	}
 
 	private static final long serialVersionUID = 1L;
