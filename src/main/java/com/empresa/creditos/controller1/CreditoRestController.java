@@ -1,4 +1,4 @@
-package com.empresa.creditos.controller;
+package com.empresa.creditos.controller1;
 
 import java.util.HashMap;
 import java.util.List;
