@@ -9,7 +9,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -18,11 +17,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceContexts;
 import javax.persistence.PostLoad;
 import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -153,8 +151,8 @@ public class Credito implements Serializable {
 	@PostLoad
 	public void postLoad() {
 
-		// System.out.println("=== POSTLOAD === : " + this.toString());
 		setSavedCredito(new Credito(this));
+		System.out.println("=== POSTLOAD === : " + this.toString());
 
 	}
 
@@ -193,33 +191,6 @@ public class Credito implements Serializable {
 		} else {
 			// Si el cobro no tiene creditos, asigna al credito la posicion 1 en ruta
 			posicionEnRuta = 1;
-		}
-
-	}
-
-	@PostUpdate
-	public void postUpdate() {
-
-		if (cancelado) {
-
-			final int numeroCreditos = cobro.getNumeroDeCreditos();
-			final int rutaAnterior = this.getSavedCredito().getPosicionEnRuta();
-
-			if (rutaAnterior <= numeroCreditos) {
-
-				final List<Credito> creditos = cobro.getCreditos();
-				final int puntoDeInicio = rutaAnterior - 1;
-
-				for (int i = puntoDeInicio; i < numeroCreditos; i++) {
-
-					final Credito credito = creditos.get(i);
-					credito.setPosicionEnRuta(credito.getPosicionEnRuta() - 1);
-
-					System.out.println(credito.toString());
-				}
-
-			}
-
 		}
 
 	}

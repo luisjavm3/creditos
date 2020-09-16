@@ -2,6 +2,7 @@ package com.empresa.creditos.entity.liquidacion;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 import javax.persistence.Column;
@@ -30,7 +31,7 @@ public class Abono implements Serializable {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@MapsId("liquidacionId")
-	@JsonIgnoreProperties(value = { "cobro", "abonos", "hibernateLazyInitializer" })
+	@JsonIgnoreProperties(value = { "abonos", "hibernateLazyInitializer" })
 	private Liquidacion liquidacion;
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -44,6 +45,11 @@ public class Abono implements Serializable {
 	}
 
 	public Abono(Credito credito, int abono) {
+
+		if (credito.getSaldo() - abono < 0) {
+			return;
+		}
+
 		this.credito = credito;
 		this.abono = abono;
 	}
@@ -56,19 +62,32 @@ public class Abono implements Serializable {
 	// ====================== Entity's Life Cycle ===================
 
 	@PrePersist
-	public void prePersist() throws Exception {
+	public void prePersist() {
 
 		int saldoMenosAbono = credito.getSaldo() - abono;
 
 		if (saldoMenosAbono == 0) {
+
+			int posicionAntesDeActualizar = credito.getPosicionEnRuta();
+
 			credito.setSaldo(0);
 			credito.setCancelado(true);
 			credito.setFechaCancelado(new Date());
 			credito.setPosicionEnRuta(null);
+
+			// Esta lista de creditos contiene al credito actualizado, pero en su posicion
+			// de ruta original
+			List<Credito> creditos = liquidacion.getCobro().getCreditos();
+
+			for (int i = posicionAntesDeActualizar; i < creditos.size(); i++) {
+				Credito c = creditos.get(i);
+				c.setPosicionEnRuta(c.getPosicionEnRuta() - 1);
+			}
+
 		} else if (saldoMenosAbono > 0) {
 			credito.setSaldo(saldoMenosAbono);
 		} else {
-			throw new Exception("El abono a realizar no debe ser mayor que el saldo restante.");
+			// do-nothing
 		}
 
 	}
