@@ -7,11 +7,11 @@ import com.empresa.creditos.entity.credito.Perioricidad;
 public interface IPerioricidadService {
 
 	Perioricidad save(Perioricidad perioricidad);
-	
-	Perioricidad findByPerioricidad(int perioricidad);
-	
-	Perioricidad findByDescripcion(String perioricidad);
-	
+
+	// Perioricidad findByPerioricidad(int perioricidad);
+
+	Perioricidad findByPerioricidad(String perioricidad);
+
 	List<Perioricidad> findAll();
-	
+
 }

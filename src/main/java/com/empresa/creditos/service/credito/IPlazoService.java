@@ -8,9 +8,9 @@ public interface IPlazoService {
 
 	Plazo save(Plazo plazo);
 
-	Plazo findByPlazo(int plazo);
+	// Plazo findByPlazo(int plazo);
 
-	Plazo findByDescripcion(String descripcion);
+	Plazo findByPlazo(String plazo);
 
 	List<Plazo> findAll();
 

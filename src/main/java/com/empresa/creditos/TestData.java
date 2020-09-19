@@ -396,8 +396,8 @@ public class TestData {
 	public void insertarCreditosDePrueba() {
 
 		Interes interes = this.interesService.findByInteres(20);
-		Perioricidad perioricidad = this.perioricidadService.findByDescripcion("DIARIO");
-		Plazo plazo = this.plazoService.findByDescripcion("MENSUAL");
+		Perioricidad perioricidad = this.perioricidadService.findByPerioricidad("DIARIO");
+		Plazo plazo = this.plazoService.findByPlazo("MENSUAL");
 
 		Cliente cliente1 = clienteService.findByCedula(123456);
 		Cliente cliente2 = clienteService.findByCedula(123457);

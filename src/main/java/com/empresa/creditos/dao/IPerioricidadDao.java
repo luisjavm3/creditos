@@ -6,14 +6,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.empresa.creditos.entity.credito.Perioricidad;
 
-public interface IPerioricidadDao extends JpaRepository<Perioricidad, Integer>{
+public interface IPerioricidadDao extends JpaRepository<Perioricidad, Integer> {
 
 	Perioricidad save(Perioricidad perioricidad);
-	
-	Perioricidad findByPerioricidad(int perioricidad);
-	
-	Perioricidad findByDescripcion(String perioricidad);
-	
+
+	// Perioricidad findByPerioricidad(int perioricidad);
+
+	Perioricidad findByPerioricidad(String perioricidad);
+
 	List<Perioricidad> findAll();
-	
+
 }

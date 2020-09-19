@@ -14,11 +14,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import com.empresa.creditos.entity.credito.Credito;
 import com.empresa.creditos.entity.liquidacion.Liquidacion;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.NaturalId;
@@ -34,7 +33,6 @@ public class Cobro implements Serializable {
 	@NaturalId
 	private String nombre;
 
-	// @Transient
 	@Formula(value = "SELECT COUNT(c.cobro_id) FROM creditos c WHERE c.cobro_id = id AND c.cancelado = 0")
 	private int numeroDeCreditos;
 
@@ -45,20 +43,16 @@ public class Cobro implements Serializable {
 
 	@OneToOne(mappedBy = "cobro", cascade = { CascadeType.PERSIST, CascadeType.REFRESH,
 			CascadeType.MERGE }, orphanRemoval = false, fetch = FetchType.LAZY)
-	@JsonIgnoreProperties(value = { "creditos", "cobro" })
 	private Cobrador cobrador;
 
 	@OneToMany(mappedBy = "cobro", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonIgnoreProperties(value = { "cobro", "credito" })
 	private List<Cliente> clientes = new ArrayList<Cliente>();
 
 	@OneToMany(mappedBy = "cobro", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonIgnoreProperties(value = { "cobro", "abonos", "cliente", "cobrador" })
 	@OrderBy("posicionEnRuta")
 	private List<Credito> creditos = new ArrayList<Credito>();
 
 	@OneToMany(mappedBy = "cobro", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonIgnoreProperties(value = { "cobro", "abonos" })
 	private List<Liquidacion> liquidaciones = new ArrayList<Liquidacion>();
 
 	// ====================== Constructors =======================
@@ -105,10 +99,18 @@ public class Cobro implements Serializable {
 		l.setCobro(null);
 	}
 
-	// ====================== Getters and Setters ======================
+	// ====================== Getters ======================
 
-	public Cobrador getCobrador() {
-		return this.cobrador;
+	public int getId() {
+		return this.id;
+	}
+
+	public String getNombre() {
+		return this.nombre;
+	}
+
+	public int getNumeroDeCreditos() {
+		return this.numeroDeCreditos;
 	}
 
 	public Integer getTotal() {
@@ -117,56 +119,56 @@ public class Cobro implements Serializable {
 		return this.total;
 	}
 
-	public void setTotal(Integer total) {
-		this.total = total;
+	@JsonIgnore
+	public Cobrador getCobrador() {
+		return this.cobrador;
 	}
 
-	public int getId() {
-		return this.id;
+	@JsonIgnore
+	public List<Cliente> getClientes() {
+		return this.clientes;
 	}
+
+	@JsonIgnore
+	public List<Credito> getCreditos() {
+		return this.creditos;
+	}
+
+	@JsonIgnore
+	public List<Liquidacion> getLiquidaciones() {
+		return this.liquidaciones;
+	}
+
+	// ====================== Setters ======================
 
 	public void setId(int id) {
 		this.id = id;
-	}
-
-	public String getNombre() {
-		return this.nombre;
 	}
 
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
 
-	public List<Cliente> getClientes() {
-		return this.clientes;
+	public void setNumeroDeCreditos(int numeroDeCreditos) {
+		this.numeroDeCreditos = numeroDeCreditos;
 	}
+
+	public void setTotal(Integer total) {
+		this.total = total;
+	}
+
+	// SetCobrador is a helper method
 
 	public void setClientes(List<Cliente> clientes) {
 		this.clientes = clientes;
-	}
-
-	public List<Credito> getCreditos() {
-		return this.creditos;
 	}
 
 	public void setCreditos(List<Credito> creditos) {
 		this.creditos = creditos;
 	}
 
-	public List<Liquidacion> getLiquidaciones() {
-		return this.liquidaciones;
-	}
-
 	public void setLiquidaciones(List<Liquidacion> liquidaciones) {
 		this.liquidaciones = liquidaciones;
-	}
-
-	public int getNumeroDeCreditos() {
-		return this.numeroDeCreditos;
-	}
-
-	public void setNumeroDeCreditos(int numeroDeCreditos) {
-		this.numeroDeCreditos = numeroDeCreditos;
 	}
 
 	@Override

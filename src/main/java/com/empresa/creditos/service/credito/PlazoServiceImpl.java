@@ -16,25 +16,22 @@ public class PlazoServiceImpl implements IPlazoService {
 
 	@Override
 	public Plazo save(Plazo plazo) {
-
 		return this.plazoDao.save(plazo);
 	}
 
-	@Override
-	public Plazo findByPlazo(int plazo) {
+	// @Override
+	// public Plazo findByPlazo(int plazo) {
 
+	// 	return this.plazoDao.findByPlazo(plazo);
+	// }
+
+	@Override
+	public Plazo findByPlazo(String plazo) {
 		return this.plazoDao.findByPlazo(plazo);
 	}
 
 	@Override
-	public Plazo findByDescripcion(String descripcion) {
-
-		return this.plazoDao.findByDescripcion(descripcion);
-	}
-
-	@Override
 	public List<Plazo> findAll() {
-
 		return this.plazoDao.findAll();
 	}
 

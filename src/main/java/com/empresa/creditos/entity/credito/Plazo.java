@@ -18,9 +18,9 @@ public class Plazo implements Serializable {
 	public Plazo() {
 	}
 
-	public Plazo(int plazo, String descripcion) {
-		this.plazo = plazo;
-		this.descripcion = descripcion;
+	public Plazo(int dias, String descripcion) {
+		this.dias = dias;
+		this.plazo = descripcion;
 	}
 
 	@Id
@@ -28,11 +28,10 @@ public class Plazo implements Serializable {
 	private int id;
 
 	@NaturalId
-	@Column(unique = true, nullable = false) // Esto puede resultar redundate debido a la notacion NaturalId
-	private int plazo;
+	private String plazo;
 
 	@Column(unique = true, nullable = false)
-	private String descripcion;
+	private int dias;
 
 	public int getId() {
 		return id;
@@ -42,20 +41,20 @@ public class Plazo implements Serializable {
 		this.id = id;
 	}
 
-	public int getPlazo() {
+	public int getDias() {
+		return this.dias;
+	}
+
+	public void setDias(int dias) {
+		this.dias = dias;
+	}
+
+	public String getPlazo() {
 		return plazo;
 	}
 
-	public void setPlazo(int plazo) {
+	public void setPlazo(String plazo) {
 		this.plazo = plazo;
-	}
-
-	public String getDescripcion() {
-		return descripcion;
-	}
-
-	public void setDescripcion(String descripcion) {
-		this.descripcion = descripcion;
 	}
 
 	private static final long serialVersionUID = 1L;

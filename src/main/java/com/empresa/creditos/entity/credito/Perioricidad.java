@@ -18,9 +18,9 @@ public class Perioricidad implements Serializable {
 	public Perioricidad() {
 	}
 
-	public Perioricidad(int perioricidad, String descripcion) {
-		this.perioricidad = perioricidad;
-		this.descripcion = descripcion;
+	public Perioricidad(int dias, String descripcion) {
+		this.dias = dias;
+		this.perioricidad = descripcion;
 	}
 
 	@Id
@@ -28,10 +28,10 @@ public class Perioricidad implements Serializable {
 	private int id;
 
 	@NaturalId
-	private int perioricidad;
+	private String perioricidad;
 
 	@Column(unique = true, nullable = false)
-	private String descripcion;
+	private int dias;
 
 	public int getId() {
 		return id;
@@ -41,20 +41,20 @@ public class Perioricidad implements Serializable {
 		this.id = id;
 	}
 
-	public int getPerioricidad() {
-		return perioricidad;
+	public int getDias() {
+		return this.dias;
 	}
 
-	public void setPerioricidad(int perioricidad) {
+	public void setDias(int dias) {
+		this.dias = dias;
+	}
+
+	public String getPerioricidad() {
+		return this.perioricidad;
+	}
+
+	public void setPerioricidad(String perioricidad) {
 		this.perioricidad = perioricidad;
-	}
-
-	public String getDescripcion() {
-		return descripcion;
-	}
-
-	public void setDescripcion(String descripcion) {
-		this.descripcion = descripcion;
 	}
 
 	private static final long serialVersionUID = 1L;

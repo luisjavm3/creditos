@@ -17,28 +17,25 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.PostUpdate;
 import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 
 import com.empresa.creditos.entity.Cliente;
 import com.empresa.creditos.entity.Cobrador;
 import com.empresa.creditos.entity.Cobro;
 import com.empresa.creditos.entity.liquidacion.Abono;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.Where;
 
 @Entity
 @Table(name = "creditos")
-// @Table(name = "creditos", uniqueConstraints = @UniqueConstraint(columnNames =
-// { "cobro_id", "posicion_ruta" }))
 @Where(clause = "cancelado = false")
 public class Credito implements Serializable {
 
@@ -74,46 +71,33 @@ public class Credito implements Serializable {
 
 	private int total;
 
-	@Transient
-	@JsonIgnoreProperties(value = { "fechaCredito", "fechaCancelado", "credito", "cancelado", "cuota", "totalAbonos",
-			"saldo", "boleta", "total", "cobro", "cliente", "abonos", "cobrador", "interes", "perioricidad", "plazo",
-			"saveCredito" })
-	private transient Credito savedCredito;
-
 	// ====================== Entity's Relationships ======================
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cobro_id", nullable = false)
-	@JsonIgnoreProperties(value = { "creditos", "cobrador", "clientes", "liquidaciones", "hibernateLazyInitializer" })
 	private Cobro cobro;
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cliente_id", referencedColumnName = "id", nullable = false)
-	@JsonIgnoreProperties(value = { "cobro", "credito", "hibernateLazyInitializer" })
 	private Cliente cliente;
 
 	@OneToMany(mappedBy = "credito", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonIgnoreProperties(value = { "id", "credito" })
 	private List<Abono> abonos = new ArrayList<Abono>();
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cobrador_id", nullable = false)
-	@JsonIgnoreProperties(value = { "cobro", "creditos", "hibernateLazyInitializer" })
 	private Cobrador cobrador;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "interes_id", nullable = false)
-	@JsonIgnoreProperties(value = { "hibernateLazyInitializer" })
 	private Interes interes;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "perioricidad_id", nullable = false)
-	@JsonIgnoreProperties(value = { "hibernateLazyInitializer" })
 	private Perioricidad perioricidad;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "plazo_id", nullable = false)
-	@JsonIgnoreProperties(value = { "hibernateLazyInitializer" })
 	private Plazo plazo;
 
 	// ====================== Constructors =======================
@@ -148,21 +132,13 @@ public class Credito implements Serializable {
 
 	// ====================== Entity's Life Cycle ===================
 
-	@PostLoad
-	public void postLoad() {
-
-		setSavedCredito(new Credito(this));
-		System.out.println("=== POSTLOAD === : " + this.toString());
-
-	}
-
 	@PrePersist
 	public void prePersist() {
 
 		fechaCredito = new Date();
 		cancelado = false;
 		total = credito * (100 + interes.getInteres()) / 100;
-		cuota = total / plazo.getPlazo();
+		cuota = total / plazo.getDias();
 		saldo = total;
 
 		final int numeroDeCreditos = cobro.getNumeroDeCreditos();
@@ -197,82 +173,32 @@ public class Credito implements Serializable {
 
 	// ====================== Helper Methods ======================
 
-	public void addAbono(final Abono a) {
+	public void addAbono(Abono a) {
 		a.setCredito(this);
 		this.abonos.add(a);
 	}
 
-	public void removeAbono(final Abono a) {
+	public void removeAbono(Abono a) {
 		a.setCredito(null);
 		this.abonos.remove(a);
 	}
 
-	// ====================== Getters and Setters ======================
-
-	public void setCobrador(final Cobrador c) {
-		this.cobrador = c;
-	}
-
-	public Cobrador getCobrador() {
-		return cobrador;
-	}
-
-	public int getTotalAbonos() {
-		if (this.totalAbonos == null)
-			return 0;
-		return totalAbonos;
-	}
-
-	public void setTotalAbonos(final Integer totalAbonos) {
-		this.totalAbonos = totalAbonos;
-	}
-
-	public List<Abono> getAbonos() {
-		return abonos;
-	}
-
-	public void setAbonos(final List<Abono> abonos) {
-		this.abonos = abonos;
-	}
-
-	public boolean isCancelado() {
-		return cancelado;
-	}
-
-	public void setCancelado(final boolean cancelado) {
-		this.cancelado = cancelado;
-	}
+	// ====================== Getters ======================
 
 	public int getId() {
 		return id;
-	}
-
-	public void setId(final int id) {
-		this.id = id;
 	}
 
 	public Date getFechaCredito() {
 		return fechaCredito;
 	}
 
-	public void setFechaCredito(final Date fechaCredito) {
-		this.fechaCredito = fechaCredito;
-	}
-
 	public Date getFechaCancelado() {
 		return fechaCancelado;
 	}
 
-	public void setFechaCancelado(final Date fechaCancelado) {
-		this.fechaCancelado = fechaCancelado;
-	}
-
 	public int getCredito() {
 		return credito;
-	}
-
-	public void setCredito(final int credito) {
-		this.credito = credito;
 	}
 
 	public int getPosicionEnRuta() {
@@ -281,72 +207,22 @@ public class Credito implements Serializable {
 		return this.posicionEnRuta;
 	}
 
-	public void setPosicionEnRuta(final Integer posicionEnRuta) {
-		this.posicionEnRuta = posicionEnRuta;
+	public boolean getCancelado() {
+		return this.cancelado;
+	}
+
+	public boolean isCancelado() {
+		return cancelado;
 	}
 
 	public float getCuota() {
 		return cuota;
 	}
 
-	public void setCuota(final float cuota) {
-		this.cuota = cuota;
-	}
-
-	public int getBoleta() {
-		return boleta;
-	}
-
-	public void setBoleta(final int boleta) {
-		this.boleta = boleta;
-	}
-
-	public int getTotal() {
-		return total;
-	}
-
-	public void setTotal(final int total) {
-		this.total = total;
-	}
-
-	public Cliente getCliente() {
-		return cliente;
-	}
-
-	public void setCliente(final Cliente cliente) {
-		this.cliente = cliente;
-	}
-
-	public Cobro getCobro() {
-		return cobro;
-	}
-
-	public void setCobro(final Cobro cobro) {
-		this.cobro = cobro;
-	}
-
-	public Interes getInteres() {
-		return interes;
-	}
-
-	public void setInteres(final Interes interes) {
-		this.interes = interes;
-	}
-
-	public Perioricidad getPerioricidad() {
-		return perioricidad;
-	}
-
-	public void setPerioricidad(final Perioricidad perioricidad) {
-		this.perioricidad = perioricidad;
-	}
-
-	public Plazo getPlazo() {
-		return plazo;
-	}
-
-	public void setPlazo(final Plazo plazo) {
-		this.plazo = plazo;
+	public int getTotalAbonos() {
+		if (this.totalAbonos == null)
+			return 0;
+		return totalAbonos;
 	}
 
 	public Integer getSaldo() {
@@ -355,16 +231,130 @@ public class Credito implements Serializable {
 		return this.saldo;
 	}
 
+	public int getBoleta() {
+		return boleta;
+	}
+
+	public int getTotal() {
+		return total;
+	}
+
+	// -----
+
+	@JsonIgnore
+	public Cobro getCobro() {
+		return cobro;
+	}
+
+	// @JsonIgnoreProperties(value = { "cobro", "credito",
+	// "hibernateLazyInitializer" })
+	@JsonIgnore
+	public Cliente getCliente() {
+		return cliente;
+	}
+
+	@JsonIgnore
+	public List<Abono> getAbonos() {
+		return abonos;
+	}
+
+	// @JsonIgnoreProperties(value = { "cobro", "creditos",
+	// "hibernateLazyInitializer" })
+	@JsonIgnore
+	public Cobrador getCobrador() {
+		return cobrador;
+	}
+
+	@JsonUnwrapped
+	@JsonIgnoreProperties(value = { "id", "hibernateLazyInitializer" })
+	public Interes getInteres() {
+		return interes;
+	}
+
+	@JsonUnwrapped
+	@JsonIgnoreProperties(value = { "id", "dias", "hibernateLazyInitializer" })
+	public Perioricidad getPerioricidad() {
+		return perioricidad;
+	}
+
+	@JsonUnwrapped
+	@JsonIgnoreProperties(value = { "id", "dias", "hibernateLazyInitializer" })
+	public Plazo getPlazo() {
+		return plazo;
+	}
+
+	// ====================== Setters ======================
+
+	public void setCobrador(Cobrador c) {
+		this.cobrador = c;
+	}
+
+	public void setTotalAbonos(final Integer totalAbonos) {
+		this.totalAbonos = totalAbonos;
+	}
+
+	public void setAbonos(final List<Abono> abonos) {
+		this.abonos = abonos;
+	}
+
+	public void setCancelado(final boolean cancelado) {
+		this.cancelado = cancelado;
+	}
+
+	public void setId(final int id) {
+		this.id = id;
+	}
+
+	public void setFechaCredito(final Date fechaCredito) {
+		this.fechaCredito = fechaCredito;
+	}
+
+	public void setFechaCancelado(final Date fechaCancelado) {
+		this.fechaCancelado = fechaCancelado;
+	}
+
+	public void setCredito(final int credito) {
+		this.credito = credito;
+	}
+
+	public void setPosicionEnRuta(final Integer posicionEnRuta) {
+		this.posicionEnRuta = posicionEnRuta;
+	}
+
+	public void setCuota(final float cuota) {
+		this.cuota = cuota;
+	}
+
+	public void setBoleta(final int boleta) {
+		this.boleta = boleta;
+	}
+
+	public void setTotal(final int total) {
+		this.total = total;
+	}
+
+	public void setCliente(final Cliente cliente) {
+		this.cliente = cliente;
+	}
+
+	public void setCobro(final Cobro cobro) {
+		this.cobro = cobro;
+	}
+
+	public void setInteres(final Interes interes) {
+		this.interes = interes;
+	}
+
+	public void setPerioricidad(final Perioricidad perioricidad) {
+		this.perioricidad = perioricidad;
+	}
+
+	public void setPlazo(final Plazo plazo) {
+		this.plazo = plazo;
+	}
+
 	public void setSaldo(final Integer saldo) {
 		this.saldo = saldo;
-	}
-
-	public Credito getSavedCredito() {
-		return this.savedCredito;
-	}
-
-	public void setSavedCredito(final Credito credito) {
-		this.savedCredito = credito;
 	}
 
 	@Override

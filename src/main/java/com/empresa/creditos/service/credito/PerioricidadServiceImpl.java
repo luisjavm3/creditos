@@ -16,25 +16,22 @@ public class PerioricidadServiceImpl implements IPerioricidadService {
 
 	@Override
 	public Perioricidad save(Perioricidad perioricidad) {
-
 		return this.perioricidadDao.save(perioricidad);
 	}
 
-	@Override
-	public Perioricidad findByPerioricidad(int perioricidad) {
+	// @Override
+	// public Perioricidad findByPerioricidad(int perioricidad) {
 
+	// // return this.perioricidadDao.findByPerioricidad(perioricidad);
+	// }
+
+	@Override
+	public Perioricidad findByPerioricidad(String perioricidad) {
 		return this.perioricidadDao.findByPerioricidad(perioricidad);
 	}
 
 	@Override
-	public Perioricidad findByDescripcion(String perioricidad) {
-
-		return this.perioricidadDao.findByDescripcion(perioricidad);
-	}
-
-	@Override
 	public List<Perioricidad> findAll() {
-
 		return this.perioricidadDao.findAll();
 	}
 
