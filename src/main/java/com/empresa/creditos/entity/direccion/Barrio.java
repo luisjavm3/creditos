@@ -23,7 +23,7 @@ public class Barrio implements Serializable {
 	private int id;
 
 	@Column(nullable = false)
-	private String nombre;
+	private String barrio;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "municipio_id", nullable = false)
@@ -40,12 +40,12 @@ public class Barrio implements Serializable {
 		this.id = id;
 	}
 
-	public String getNombre() {
-		return nombre;
+	public String getBarrio() {
+		return barrio;
 	}
 
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
+	public void setBarrio(String barrio) {
+		this.barrio = barrio;
 	}
 
 	public Municipio getMunicipio() {

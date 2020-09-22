@@ -22,6 +22,7 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import com.empresa.creditos.entity.Cobro;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.hibernate.annotations.Formula;
@@ -69,11 +70,13 @@ public class Liquidacion implements Serializable {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cobro_id", referencedColumnName = "id", nullable = false)
-	@JsonIgnoreProperties(value = { "clientes", "creditos", "liquidaciones", "hibernateLazyInitializer" })
+	// @JsonIgnoreProperties(value = { "clientes", "creditos", "liquidaciones", "hibernateLazyInitializer" })
+	@JsonIgnore
 	private Cobro cobro;
 
 	@OneToMany(mappedBy = "liquidacion", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonIgnoreProperties(value = { "id", "liquidacion" })
+	// @JsonIgnoreProperties(value = { "id", "liquidacion" })
+	// @JsonIgnore
 	private List<Abono> abonos = new ArrayList<Abono>();
 
 	// ====================== Constructors =======================

@@ -25,7 +25,7 @@ public class Departamento implements Serializable {
 	private int id;
 
 	@NaturalId
-	private String nombre;
+	private String departamento;
 
 	@OneToMany(mappedBy = "departamento", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnoreProperties(value = { "departamento" })
@@ -53,12 +53,12 @@ public class Departamento implements Serializable {
 		this.id = id;
 	}
 
-	public String getNombre() {
-		return nombre;
+	public String getDepartamento() {
+		return this.departamento;
 	}
 
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
+	public void setDepartamento(String departamento) {
+		this.departamento = departamento;
 	}
 
 	public List<Municipio> getMunicipios() {

@@ -25,8 +25,8 @@ public class MunicipioserviceImpl implements IMunicipioService{
 	}
 
 	@Override
-	public Municipio findByNombre(String nombre) {
-		return municipioDao.findByNombre(nombre);
+	public Municipio findByMunicipio(String nombre) {
+		return municipioDao.findByMunicipio(nombre);
 	}
 
 	@Override

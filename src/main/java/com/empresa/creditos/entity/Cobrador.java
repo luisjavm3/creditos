@@ -16,12 +16,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.NaturalId;
-
 import com.empresa.creditos.entity.credito.Credito;
 import com.empresa.creditos.entity.direccion.Direccion;
 import com.empresa.creditos.entity.telefono.TelefonoCobrador;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import org.hibernate.annotations.NaturalId;
 
 @Entity
 @Table(name = "cobradores")
@@ -56,7 +57,9 @@ public class Cobrador implements Serializable {
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cobro_id", referencedColumnName = "id")
-	@JsonIgnoreProperties(value = { "cobrador", "clientes", "creditos", "liquidaciones", "hibernateLazyInitializer" })
+	// @JsonIgnoreProperties(value = { "cobrador", "clientes", "creditos",
+	// "liquidaciones", "hibernateLazyInitializer" })
+	@JsonIgnore
 	private Cobro cobro;
 
 	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
@@ -69,7 +72,8 @@ public class Cobrador implements Serializable {
 	private List<TelefonoCobrador> telefonos = new ArrayList<TelefonoCobrador>();
 
 	@OneToMany(mappedBy = "cobrador")
-	@JsonIgnoreProperties(value = { "cobro", "abonos", "cobrador" })
+	// @JsonIgnoreProperties(value = { "cobro", "abonos", "cobrador" })
+	@JsonIgnore
 	private List<Credito> creditos = new ArrayList<Credito>();
 
 	// ##################### Helper Methods ###########################

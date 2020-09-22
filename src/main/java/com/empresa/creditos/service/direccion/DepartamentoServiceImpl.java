@@ -27,9 +27,9 @@ public class DepartamentoServiceImpl implements IDepartamentoService{
 	}
 
 	@Override
-	public Departamento findByNombre(String nombre) {
+	public Departamento findByDepartamento(String nombre) {
 
-		return this.departamentoDao.findByNombre(nombre);
+		return this.departamentoDao.findByDepartamento(nombre);
 	}
 
 }

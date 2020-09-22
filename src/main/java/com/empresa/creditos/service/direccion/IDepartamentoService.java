@@ -8,7 +8,7 @@ public interface IDepartamentoService {
 
 	Departamento save(Departamento departamento);
 	
-	Departamento findByNombre(String nombre);
+	Departamento findByDepartamento(String nombre);
 	
 	List<Departamento> findAll();
 	

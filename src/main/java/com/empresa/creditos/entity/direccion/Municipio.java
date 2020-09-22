@@ -27,7 +27,7 @@ public class Municipio implements Serializable {
 	private int id;
 
 	@Column(nullable = false)
-	private String nombre;
+	private String municipio;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "departamento_id", nullable = false)
@@ -44,7 +44,7 @@ public class Municipio implements Serializable {
 	}
 
 	public Municipio(String nombre) {
-		this.nombre = nombre;
+		this.municipio = nombre;
 	}
 	// ########## Helper Methods ###################
 
@@ -68,12 +68,12 @@ public class Municipio implements Serializable {
 		this.id = id;
 	}
 
-	public String getNombre() {
-		return nombre;
+	public String getMunicipio() {
+		return this.municipio;
 	}
 
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
+	public void setMunicipio(String municipio) {
+		this.municipio = municipio;
 	}
 
 	public Departamento getDepartamento() {
@@ -94,7 +94,7 @@ public class Municipio implements Serializable {
 
 	@Override
 	public String toString() {
-		return "{" + " id='" + getId() + "'" + ", nombre='" + getNombre() + "'" + "}";
+		return "{" + " id='" + getId() + "'" + ", municipio='" + getMunicipio() + "'" + "}";
 	}
 
 	private static final long serialVersionUID = 1L;

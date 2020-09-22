@@ -1,6 +1,7 @@
 package com.empresa.creditos.entity.liquidacion;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -15,28 +16,36 @@ import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 import com.empresa.creditos.entity.credito.Credito;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 @Entity
 @Table(name = "abonos")
 public class Abono implements Serializable {
 
 	@EmbeddedId
+	@JsonUnwrapped
 	private AbonoId id = new AbonoId();
 
 	@Column(nullable = false)
 	private int abono;
 
+	@Column(name = "created_at", nullable = false)
+	private LocalDate createdAt;
+
 	// ====================== Entity's Relationships ======================
 
+	// @JsonIgnoreProperties(value = { "abonos", "hibernateLazyInitializer" })
 	@ManyToOne(fetch = FetchType.LAZY)
 	@MapsId("liquidacionId")
-	@JsonIgnoreProperties(value = { "abonos", "hibernateLazyInitializer" })
+	@JsonIgnore
 	private Liquidacion liquidacion;
 
+	// @JsonIgnoreProperties(value = { "cobro", "cliente", "abonos", "cobrador",
+	// "hibernateLazyInitializer" })
 	@ManyToOne(fetch = FetchType.LAZY)
 	@MapsId("creditoId")
-	@JsonIgnoreProperties(value = { "cobro", "cliente", "abonos", "cobrador", "hibernateLazyInitializer" })
+	@JsonIgnore
 	private Credito credito;
 
 	// ====================== Constructors =======================
@@ -63,6 +72,8 @@ public class Abono implements Serializable {
 
 	@PrePersist
 	public void prePersist() {
+
+		this.createdAt = LocalDate.now();
 
 		int saldoMenosAbono = credito.getSaldo() - abono;
 
@@ -96,32 +107,33 @@ public class Abono implements Serializable {
 
 	// ====================== Getters and Setters ====================
 
+	// @JsonAnyGetter
 	public AbonoId getId() {
 		return id;
 	}
 
-	public void setId(AbonoId id) {
-		this.id = id;
+	public int getAbono() {
+		return abono;
 	}
 
 	public Liquidacion getLiquidacion() {
 		return liquidacion;
 	}
 
-	public void setLiquidacion(Liquidacion liquidacion) {
-		this.liquidacion = liquidacion;
-	}
-
 	public Credito getCredito() {
 		return credito;
 	}
 
-	public void setCredito(Credito credito) {
-		this.credito = credito;
+	public void setId(AbonoId id) {
+		this.id = id;
 	}
 
-	public int getAbono() {
-		return abono;
+	public void setLiquidacion(Liquidacion liquidacion) {
+		this.liquidacion = liquidacion;
+	}
+
+	public void setCredito(Credito credito) {
+		this.credito = credito;
 	}
 
 	public void setAbono(int abono) {
@@ -129,6 +141,14 @@ public class Abono implements Serializable {
 			throw new IllegalArgumentException();
 		}
 		this.abono = abono;
+	}
+
+	public LocalDate getCreatedAt() {
+		return this.createdAt;
+	}
+
+	public void setCreatedAt(LocalDate createdAt) {
+		this.createdAt = createdAt;
 	}
 
 	@Override

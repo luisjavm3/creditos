@@ -8,7 +8,7 @@ public interface IMunicipioService {
 
 	Municipio save(Municipio municipio);
 	
-	Municipio findByNombre(String nombre);
+	Municipio findByMunicipio(String nombre);
 
 	void delete(Municipio municipio);
 	

@@ -41,18 +41,26 @@ public class Cobro implements Serializable {
 
 	// ====================== Entity's Relationships ======================
 
+	// @JsonIgnoreProperties(value = { "cobro", "creditos" })
 	@OneToOne(mappedBy = "cobro", cascade = { CascadeType.PERSIST, CascadeType.REFRESH,
 			CascadeType.MERGE }, orphanRemoval = false, fetch = FetchType.LAZY)
+	@JsonIgnore
 	private Cobrador cobrador;
 
+	// @JsonIgnoreProperties(value = { "cobro" })
 	@OneToMany(mappedBy = "cobro", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore
 	private List<Cliente> clientes = new ArrayList<Cliente>();
 
+	// @JsonIgnoreProperties(value = { "cobro", "cobrador", "abonos" })
 	@OneToMany(mappedBy = "cobro", cascade = CascadeType.ALL, orphanRemoval = true)
 	@OrderBy("posicionEnRuta")
+	@JsonIgnore
 	private List<Credito> creditos = new ArrayList<Credito>();
 
+	// @JsonIgnoreProperties(value = { "cobro" })
 	@OneToMany(mappedBy = "cobro", cascade = CascadeType.ALL, orphanRemoval = true)
+	@JsonIgnore
 	private List<Liquidacion> liquidaciones = new ArrayList<Liquidacion>();
 
 	// ====================== Constructors =======================
@@ -119,22 +127,18 @@ public class Cobro implements Serializable {
 		return this.total;
 	}
 
-	@JsonIgnore
 	public Cobrador getCobrador() {
 		return this.cobrador;
 	}
 
-	@JsonIgnore
 	public List<Cliente> getClientes() {
 		return this.clientes;
 	}
 
-	@JsonIgnore
 	public List<Credito> getCreditos() {
 		return this.creditos;
 	}
 
-	@JsonIgnore
 	public List<Liquidacion> getLiquidaciones() {
 		return this.liquidaciones;
 	}

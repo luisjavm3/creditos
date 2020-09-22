@@ -26,8 +26,6 @@ import com.empresa.creditos.entity.Cliente;
 import com.empresa.creditos.entity.Cobrador;
 import com.empresa.creditos.entity.Cobro;
 import com.empresa.creditos.entity.liquidacion.Abono;
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
@@ -75,10 +73,12 @@ public class Credito implements Serializable {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cobro_id", nullable = false)
+	@JsonIgnoreProperties(value = { "hibernateLazyInitializer" })
 	private Cobro cobro;
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cliente_id", referencedColumnName = "id", nullable = false)
+	@JsonIgnoreProperties(value = { "hibernateLazyInitializer" })
 	private Cliente cliente;
 
 	@OneToMany(mappedBy = "credito", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -86,18 +86,25 @@ public class Credito implements Serializable {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cobrador_id", nullable = false)
+	@JsonIgnoreProperties(value = { "hibernateLazyInitializer" })
 	private Cobrador cobrador;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "interes_id", nullable = false)
+	@JsonUnwrapped
+	@JsonIgnoreProperties(value = { "id", "hibernateLazyInitializer" })
 	private Interes interes;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "perioricidad_id", nullable = false)
+	@JsonUnwrapped
+	@JsonIgnoreProperties(value = { "id", "dias", "hibernateLazyInitializer" })
 	private Perioricidad perioricidad;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "plazo_id", nullable = false)
+	@JsonUnwrapped
+	@JsonIgnoreProperties(value = { "id", "dias", "hibernateLazyInitializer" })
 	private Plazo plazo;
 
 	// ====================== Constructors =======================
@@ -241,44 +248,43 @@ public class Credito implements Serializable {
 
 	// -----
 
-	@JsonIgnore
+	// @JsonIgnore
 	public Cobro getCobro() {
 		return cobro;
 	}
 
-	// @JsonIgnoreProperties(value = { "cobro", "credito",
-	// "hibernateLazyInitializer" })
-	@JsonIgnore
+	// @JsonIgnoreProperties(value = { "cobro", "credito", "hibernateLazyInitializer" })
+	// @JsonIgnore
 	public Cliente getCliente() {
 		return cliente;
 	}
 
-	@JsonIgnore
+	// @JsonIgnore
 	public List<Abono> getAbonos() {
 		return abonos;
 	}
 
 	// @JsonIgnoreProperties(value = { "cobro", "creditos",
 	// "hibernateLazyInitializer" })
-	@JsonIgnore
+	// @JsonIgnore
 	public Cobrador getCobrador() {
 		return cobrador;
 	}
 
-	@JsonUnwrapped
-	@JsonIgnoreProperties(value = { "id", "hibernateLazyInitializer" })
+	// @JsonUnwrapped
+	// @JsonIgnoreProperties(value = { "id", "hibernateLazyInitializer" })
 	public Interes getInteres() {
 		return interes;
 	}
 
-	@JsonUnwrapped
-	@JsonIgnoreProperties(value = { "id", "dias", "hibernateLazyInitializer" })
+	// @JsonUnwrapped
+	// @JsonIgnoreProperties(value = { "id", "dias", "hibernateLazyInitializer" })
 	public Perioricidad getPerioricidad() {
 		return perioricidad;
 	}
 
-	@JsonUnwrapped
-	@JsonIgnoreProperties(value = { "id", "dias", "hibernateLazyInitializer" })
+	// @JsonUnwrapped
+	// @JsonIgnoreProperties(value = { "id", "dias", "hibernateLazyInitializer" })
 	public Plazo getPlazo() {
 		return plazo;
 	}

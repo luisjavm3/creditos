@@ -10,7 +10,7 @@ public interface IDepartamentoDao extends CrudRepository<Departamento, Integer>{
 	
 	Departamento save(Departamento departamento);
 	
-	Departamento findByNombre(String nombre);
+	Departamento findByDepartamento(String nombre);
 	
 	List<Departamento> findAll();
 

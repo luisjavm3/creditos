@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 @Entity
 @Table(name = "direcciones")
@@ -34,17 +35,20 @@ public class Direccion implements Serializable {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "departamento_id", nullable = false)
-	@JsonIgnoreProperties(value = { "municipios", "hibernateLazyInitializer" })
+	@JsonUnwrapped
+	@JsonIgnoreProperties(value = { "id", "municipios", "hibernateLazyInitializer" })
 	private Departamento departamento;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "municipio_id", nullable = false)
-	@JsonIgnoreProperties(value = { "departamento", "barrios", "hibernateLazyInitializer" })
+	@JsonUnwrapped
+	@JsonIgnoreProperties(value = { "id", "departamento", "barrios", "hibernateLazyInitializer" })
 	private Municipio municipio;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "barrio_id", nullable = true)
-	@JsonIgnoreProperties(value = { "municipio", "hibernateLazyInitializer" })
+	@JsonUnwrapped
+	@JsonIgnoreProperties(value = { "id", "municipio", "hibernateLazyInitializer" })
 	private Barrio barrio;
 
 	@Column(nullable = false)

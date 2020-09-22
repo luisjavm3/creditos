@@ -20,6 +20,7 @@ import javax.persistence.Table;
 import com.empresa.creditos.entity.credito.Credito;
 import com.empresa.creditos.entity.direccion.Direccion;
 import com.empresa.creditos.entity.telefono.TelefonoCliente;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.hibernate.annotations.NaturalId;
@@ -46,13 +47,15 @@ public class Cliente implements Serializable {
 
 	// ====================== Entity's Relationships ================
 
+	// @JsonIgnoreProperties(value = { "clientes", "liquidaciones", "creditos", "hibernateLazyInitializer" })
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cobro_id", referencedColumnName = "id", nullable = false)
-	@JsonIgnoreProperties(value = { "clientes", "liquidaciones", "creditos", "hibernateLazyInitializer" })
+	@JsonIgnore
 	private Cobro cobro;
 
+	// @JsonIgnoreProperties(value = { "cobro", "cliente" })
 	@OneToOne(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@JsonIgnoreProperties(value = { "cobro", "cliente" })
+	@JsonIgnore
 	private Credito credito;
 
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
