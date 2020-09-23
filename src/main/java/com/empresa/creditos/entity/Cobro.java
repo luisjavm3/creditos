@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -14,6 +15,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 import com.empresa.creditos.entity.credito.Credito;
 import com.empresa.creditos.entity.liquidacion.Liquidacion;
@@ -30,7 +33,10 @@ public class Cobro implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
+	@NotBlank(message = "El nombre del cobro no debe ser Nulo ni Vacío")
+	@Size(min = 1, max = 30, message = "La longitud del nombre del cobro debe estar entre 1 y 30")
 	@NaturalId
+	@Column(nullable = false, unique = true)
 	private String nombre;
 
 	@Formula(value = "SELECT COUNT(c.cobro_id) FROM creditos c WHERE c.cobro_id = id AND c.cancelado = 0")
