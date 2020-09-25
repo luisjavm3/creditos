@@ -14,7 +14,7 @@ public interface IClienteDao extends JpaRepository<Cliente, Integer>{
 	
 	Cliente findById(int id);
 
-	Cliente findByCedula(int cedula);
+	Cliente findByCedula(String cedula);
 
 	void deleteById(int id);
 	

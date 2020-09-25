@@ -10,7 +10,7 @@ public interface IClienteService {
 	
 	Cliente findById(int id);
 
-	Cliente findByCedula(int cedula);
+	Cliente findByCedula(String cedula);
 
 	void deleteById(int id);
 	

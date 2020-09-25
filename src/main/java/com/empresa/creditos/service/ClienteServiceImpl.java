@@ -30,7 +30,7 @@ public class ClienteServiceImpl implements IClienteService {
 	}
 
 	@Override
-	public Cliente findByCedula(int cedula) {
+	public Cliente findByCedula(String cedula) {
 		return clienteDao.findByCedula(cedula);
 	}
 

@@ -3,6 +3,7 @@ package com.empresa.creditos.controller1;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -77,9 +79,18 @@ public class CobroRestController {
 	}
 
 	@PostMapping("/cobros")
-	public ResponseEntity<?> save(@Valid @RequestBody Cobro cobro) {
+	public ResponseEntity<?> save(@Valid @RequestBody Cobro cobro, BindingResult br) {
 
 		Map<String, Object> map = new HashMap<>();
+
+		if (br.hasErrors()) {
+
+			List<String> errors = br.getFieldErrors().stream().map(e -> e.getDefaultMessage())
+					.collect(Collectors.toList());
+
+			map.put("errors", errors);
+			return new ResponseEntity<>(map, HttpStatus.NOT_ACCEPTABLE);
+		}
 
 		try {
 			cobro = this.cobroService.save(cobro);

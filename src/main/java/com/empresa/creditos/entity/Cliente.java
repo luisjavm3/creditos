@@ -16,6 +16,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 import com.empresa.creditos.entity.credito.Credito;
 import com.empresa.creditos.entity.direccion.Direccion;
@@ -33,8 +35,11 @@ public class Cliente implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
+	@NotBlank(message = "La cedula no puede ser Nula o Vacía")
+	@Size(min = 7, max = 10, message = "La cedula solo debe incluir numeros y tener una longitud entre 7 y 10 digitos")
 	@NaturalId
-	private int cedula;
+	@Column(nullable = false, unique = true)
+	private String cedula;
 
 	@Column(nullable = false)
 	private String nombres;
@@ -47,7 +52,8 @@ public class Cliente implements Serializable {
 
 	// ====================== Entity's Relationships ================
 
-	// @JsonIgnoreProperties(value = { "clientes", "liquidaciones", "creditos", "hibernateLazyInitializer" })
+	// @JsonIgnoreProperties(value = { "clientes", "liquidaciones", "creditos",
+	// "hibernateLazyInitializer" })
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cobro_id", referencedColumnName = "id", nullable = false)
 	@JsonIgnore
@@ -72,7 +78,7 @@ public class Cliente implements Serializable {
 	public Cliente() {
 	}
 
-	public Cliente(int cedula, String nombres, String apellidos, String apodo) {
+	public Cliente(String cedula, String nombres, String apellidos, String apodo) {
 		this.cedula = cedula;
 		this.nombres = nombres;
 		this.apellidos = apellidos;
@@ -146,11 +152,11 @@ public class Cliente implements Serializable {
 		this.id = id;
 	}
 
-	public int getCedula() {
+	public String getCedula() {
 		return cedula;
 	}
 
-	public void setCedula(int cedula) {
+	public void setCedula(String cedula) {
 		this.cedula = cedula;
 	}
 

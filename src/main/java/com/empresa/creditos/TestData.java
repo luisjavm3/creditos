@@ -358,16 +358,16 @@ public class TestData {
 		direccion9 = this.direccionService.save(direccion9);
 		direccion10 = this.direccionService.save(direccion10);
 
-		Cliente cliente1 = new Cliente(123456, "NOMBRES CLIENTE UNO", "APELLIDOS CLIENTE UNO", "PRIMERO");
-		Cliente cliente2 = new Cliente(123457, "NOMBRES CLIENTE DOS", "APELLIDOS CLIENTE DOS", "SEGUNDO");
-		Cliente cliente3 = new Cliente(123458, "NOMBRES CLIENTE TRES", "APELLIDOS CLIENTE TRES", "TERCERO");
-		Cliente cliente4 = new Cliente(123459, "NOMBRES CLIENTE CUATRO", "APELLIDOS CLIENTE CUATRO", "CUARTO");
-		Cliente cliente5 = new Cliente(123460, "NOMBRES CLIENTE CINCO", "APELLIDOS CLIENTE CINCO", "QUINTO");
-		Cliente cliente6 = new Cliente(123461, "NOMBRES CLIENTE SEIS", "APELLIDOS CLIENTE SEIS", "SEXTO");
-		Cliente cliente7 = new Cliente(123462, "NOMBRES CLIENTE SIETE", "APELLIDOS CLIENTE SIETE", "SEPTIMO");
-		Cliente cliente8 = new Cliente(123463, "NOMBRES CLIENTE OCHO", "APELLIDOS CLIENTE OCHO", "OCTAVO");
-		Cliente cliente9 = new Cliente(123464, "NOMBRES CLIENTE NUEVE", "APELLIDOS CLIENTE NUEVE", "NOVENO");
-		Cliente cliente10 = new Cliente(123465, "NOMBRES CLIENTE DIEZ", "APELLIDOS CLIENTE DIEZ", "DECIMO");
+		Cliente cliente1 = new Cliente("1123456", "NOMBRES CLIENTE UNO", "APELLIDOS CLIENTE UNO", "PRIMERO");
+		Cliente cliente2 = new Cliente("1123457", "NOMBRES CLIENTE DOS", "APELLIDOS CLIENTE DOS", "SEGUNDO");
+		Cliente cliente3 = new Cliente("1123458", "NOMBRES CLIENTE TRES", "APELLIDOS CLIENTE TRES", "TERCERO");
+		Cliente cliente4 = new Cliente("1123459", "NOMBRES CLIENTE CUATRO", "APELLIDOS CLIENTE CUATRO", "CUARTO");
+		Cliente cliente5 = new Cliente("1123460", "NOMBRES CLIENTE CINCO", "APELLIDOS CLIENTE CINCO", "QUINTO");
+		Cliente cliente6 = new Cliente("1123461", "NOMBRES CLIENTE SEIS", "APELLIDOS CLIENTE SEIS", "SEXTO");
+		Cliente cliente7 = new Cliente("1123462", "NOMBRES CLIENTE SIETE", "APELLIDOS CLIENTE SIETE", "SEPTIMO");
+		Cliente cliente8 = new Cliente("1123463", "NOMBRES CLIENTE OCHO", "APELLIDOS CLIENTE OCHO", "OCTAVO");
+		Cliente cliente9 = new Cliente("1123464", "NOMBRES CLIENTE NUEVE", "APELLIDOS CLIENTE NUEVE", "NOVENO");
+		Cliente cliente10 = new Cliente("1123465", "NOMBRES CLIENTE DIEZ", "APELLIDOS CLIENTE DIEZ", "DECIMO");
 		cliente1.setDireccion(direccion1);
 		cliente2.setDireccion(direccion2);
 		cliente3.setDireccion(direccion3);
@@ -399,16 +399,16 @@ public class TestData {
 		Perioricidad perioricidad = this.perioricidadService.findByPerioricidad("DIARIO");
 		Plazo plazo = this.plazoService.findByPlazo("MENSUAL");
 
-		Cliente cliente1 = clienteService.findByCedula(123456);
-		Cliente cliente2 = clienteService.findByCedula(123457);
-		Cliente cliente3 = clienteService.findByCedula(123458);
-		Cliente cliente4 = clienteService.findByCedula(123459);
-		Cliente cliente5 = clienteService.findByCedula(123460);
-		Cliente cliente6 = clienteService.findByCedula(123461);
-		Cliente cliente7 = clienteService.findByCedula(123462);
-		Cliente cliente8 = clienteService.findByCedula(123463);
-		Cliente cliente9 = clienteService.findByCedula(123464);
-		Cliente cliente10 = clienteService.findByCedula(123465);
+		Cliente cliente1 = clienteService.findByCedula("1123456");
+		Cliente cliente2 = clienteService.findByCedula("1123457");
+		Cliente cliente3 = clienteService.findByCedula("1123458");
+		Cliente cliente4 = clienteService.findByCedula("1123459");
+		Cliente cliente5 = clienteService.findByCedula("1123460");
+		Cliente cliente6 = clienteService.findByCedula("1123461");
+		Cliente cliente7 = clienteService.findByCedula("1123462");
+		Cliente cliente8 = clienteService.findByCedula("1123463");
+		Cliente cliente9 = clienteService.findByCedula("1123464");
+		Cliente cliente10 = clienteService.findByCedula("1123465");
 		// Se insertan los cobro debido a que no vienen en el resultado de la
 		// busqueda(ya que no estamos en un contexto de persistencia)
 		cliente1.setCobro(cobro);
