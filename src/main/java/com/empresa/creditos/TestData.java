@@ -17,6 +17,7 @@ import com.empresa.creditos.entity.direccion.Direccion;
 import com.empresa.creditos.entity.direccion.Municipio;
 import com.empresa.creditos.entity.liquidacion.Abono;
 import com.empresa.creditos.entity.liquidacion.Liquidacion;
+import com.empresa.creditos.entity.telefono.TelefonoCliente;
 import com.empresa.creditos.service.IClienteService;
 import com.empresa.creditos.service.ICobradorService;
 import com.empresa.creditos.service.ICobroService;
@@ -378,6 +379,17 @@ public class TestData {
 		cliente8.setDireccion(direccion8);
 		cliente9.setDireccion(direccion9);
 		cliente10.setDireccion(direccion10);
+
+		// -----
+
+		TelefonoCliente t1 = new TelefonoCliente();
+		t1.setNumero("1234567890");
+		TelefonoCliente t2 = new TelefonoCliente();
+		t2.setNumero("1134567890");
+		cliente1.addTelefono(t1);
+		cliente1.addTelefono(t2);
+
+		// -----
 
 		cobro.addCliente(cliente1);
 		cobro.addCliente(cliente2);

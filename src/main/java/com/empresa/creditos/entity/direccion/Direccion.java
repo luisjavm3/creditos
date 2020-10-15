@@ -2,6 +2,7 @@ package com.empresa.creditos.entity.direccion;
 
 import java.io.Serializable;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -35,20 +36,26 @@ public class Direccion implements Serializable {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "departamento_id", nullable = false)
-	@JsonUnwrapped
-	@JsonIgnoreProperties(value = { "id", "municipios", "hibernateLazyInitializer" })
+	// @JsonUnwrapped
+	// @JsonIgnoreProperties(value = { "id", "municipios",
+	// "hibernateLazyInitializer" })
+	@JsonIgnoreProperties(value = { "municipios", "hibernateLazyInitializer" })
 	private Departamento departamento;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "municipio_id", nullable = false)
-	@JsonUnwrapped
-	@JsonIgnoreProperties(value = { "id", "departamento", "barrios", "hibernateLazyInitializer" })
+	// @JsonUnwrapped
+	// @JsonIgnoreProperties(value = {"id", "departamento", "barrios",
+	// "hibernateLazyInitializer" })
+	@JsonIgnoreProperties(value = { "departamento", "barrios", "hibernateLazyInitializer" })
 	private Municipio municipio;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "barrio_id", nullable = true)
-	@JsonUnwrapped
-	@JsonIgnoreProperties(value = { "id", "municipio", "hibernateLazyInitializer" })
+	// @JsonUnwrapped
+	// @JsonIgnoreProperties(value = { "id", "municipio", "hibernateLazyInitializer"
+	// })
+	@JsonIgnoreProperties(value = { "municipio", "hibernateLazyInitializer" })
 	private Barrio barrio;
 
 	@Column(nullable = false)
@@ -96,6 +103,13 @@ public class Direccion implements Serializable {
 
 	public void setDireccion(String direccion) {
 		this.direccion = direccion;
+	}
+
+	@Override
+	public String toString() {
+		return "{" + " id='" + getId() + "'" + ", departamento='" + getDepartamento() + "'" + ", municipio='"
+				+ getMunicipio() + "'" + ", barrio='" + getBarrio() + "'" + ", direccion='" + getDireccion() + "'"
+				+ "}";
 	}
 
 	private static final long serialVersionUID = 1L;

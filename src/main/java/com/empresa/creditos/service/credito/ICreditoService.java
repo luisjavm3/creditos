@@ -1,8 +1,9 @@
 package com.empresa.creditos.service.credito;
 
-import java.util.List;
-
 import com.empresa.creditos.entity.credito.Credito;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ICreditoService {
 
@@ -10,10 +11,6 @@ public interface ICreditoService {
 
 	Credito findById(int id);
 
-	void deleteById(int id);
-
-	void delete(Credito credito);
-
-	List<Credito> findAll();
+	Page<Credito> findAll(Pageable pageable);
 
 }

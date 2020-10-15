@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import org.hibernate.annotations.NaturalId;
 
+// @Data
 @Entity
 @Table(name = "clientes")
 public class Cliente implements Serializable {
@@ -35,18 +36,24 @@ public class Cliente implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
+	@NaturalId
 	@NotBlank(message = "La cedula no puede ser Nula o Vacía")
 	@Size(min = 7, max = 10, message = "La cedula solo debe incluir numeros y tener una longitud entre 7 y 10 digitos")
-	@NaturalId
 	@Column(nullable = false, unique = true)
 	private String cedula;
 
+	@NotBlank(message = "Los nombres del cliente no pueden ser Nulo o Vacio")
+	@Size(min = 2, max = 30, message = "El nombre debe tener una longitud entre 2 y 30")
 	@Column(nullable = false)
 	private String nombres;
 
+	@NotBlank(message = "Los apellidos del cliente no pueden ser Nulo o Vacio")
+	@Size(min = 2, max = 30, message = "Los apellidos deben tener una longitud entre 2 y 30")
 	@Column(nullable = false)
 	private String apellidos;
 
+	// @NotBlank(message="El apodo no puede estar Vacio")
+	@Size(min = 2, max = 30, message = "El apodo entre 2 y 30")
 	@Column
 	private String apodo;
 
@@ -98,7 +105,7 @@ public class Cliente implements Serializable {
 			cr.setCliente(this);
 			// adding new features
 			cr.setCobro(this.cobro);
-			cr.setCobrador(this.cobro.getCobrador());
+			cr.setCobrador(this.getCobro().getCobrador());
 		}
 		this.credito = cr;
 	}
@@ -132,6 +139,7 @@ public class Cliente implements Serializable {
 	}
 
 	public void setTelefonos(List<TelefonoCliente> telefonos) {
+		telefonos.forEach(t -> t.setCliente(this));
 		this.telefonos = telefonos;
 	}
 

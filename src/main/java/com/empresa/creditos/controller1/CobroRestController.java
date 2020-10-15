@@ -7,11 +7,10 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
-import com.empresa.creditos.entity.Cliente;
 import com.empresa.creditos.entity.Cobrador;
 import com.empresa.creditos.entity.Cobro;
-import com.empresa.creditos.entity.credito.Credito;
 import com.empresa.creditos.entity.liquidacion.Liquidacion;
+import com.empresa.creditos.service.IClienteService;
 import com.empresa.creditos.service.ICobroService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,6 +32,9 @@ public class CobroRestController {
 
 	@Autowired
 	private ICobroService cobroService;
+
+	@Autowired
+	private IClienteService clienteService;
 
 	@GetMapping("/cobros/{id}")
 	public ResponseEntity<?> findById(@PathVariable("id") int id) {
@@ -51,9 +54,9 @@ public class CobroRestController {
 		if (cobro == null) {
 			map.put("message", "No se encontró ningun cobro con ese ID");
 			return new ResponseEntity<Map<String, Object>>(map, HttpStatus.NOT_FOUND);
-		} else {
-			return new ResponseEntity<Cobro>(cobro, HttpStatus.OK);
 		}
+
+		return new ResponseEntity<Cobro>(cobro, HttpStatus.OK);
 	}
 
 	@GetMapping("/cobros")
@@ -103,91 +106,118 @@ public class CobroRestController {
 		return new ResponseEntity<Cobro>(cobro, HttpStatus.CREATED);
 	}
 
-	@GetMapping("/cobros/{id}/creditos")
-	public ResponseEntity<?> getCreditos(@PathVariable("id") int id) {
+	@PutMapping("/cobros")
+	public ResponseEntity<?> update(@Valid @RequestBody Cobro cobro, BindingResult br) {
 
-		List<Credito> creditos = null;
 		Map<String, Object> map = new HashMap<>();
 
+		if (br.hasErrors()) {
+
+			List<String> errors = br.getFieldErrors().stream().map(e -> e.getDefaultMessage())
+					.collect(Collectors.toList());
+
+			map.put("errors", errors);
+			return new ResponseEntity<>(map, HttpStatus.NOT_ACCEPTABLE);
+		}
+
 		try {
-			creditos = cobroService.findById(id).getCreditos();
+			cobro = this.cobroService.save(cobro);
 
 		} catch (Exception e) {
-			map.put("error", "Error obteniendo la lista de creditos del cobro con ID: " + id
-					+ " Puede que dicho cobro no exista");
-			return new ResponseEntity<>(map, HttpStatus.INTERNAL_SERVER_ERROR);
+			map.put("error", "Hubo un error tratando de actualiar el cobro en la base de datos!");
+			return new ResponseEntity<Map<String, Object>>(map, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		if (creditos.size() == 0) {
-			map.put("message", "El cobro no tiene creditos activos");
-			return new ResponseEntity<>(map, HttpStatus.OK);
-		}
-
-		return new ResponseEntity<>(creditos, HttpStatus.OK);
+		return new ResponseEntity<Cobro>(cobro, HttpStatus.OK);
 	}
 
+	// @GetMapping("/cobros/{id}/creditos")
+	// public ResponseEntity<?> getCreditos(@PathVariable("id") int id) {
+
+	// 	List<Credito> creditos = null;
+	// 	Map<String, Object> map = new HashMap<>();
+
+	// 	try {
+	// 		creditos = cobroService.findById(id).getCreditos();
+
+	// 	} catch (Exception e) {
+	// 		map.put("error", "Error obteniendo la lista de creditos del cobro con ID: " + id
+	// 				+ " Puede que dicho cobro no exista");
+	// 		return new ResponseEntity<>(map, HttpStatus.INTERNAL_SERVER_ERROR);
+	// 	}
+
+	// 	if (creditos.size() == 0) {
+	// 		map.put("message", "El cobro no tiene creditos activos");
+	// 		return new ResponseEntity<>(map, HttpStatus.OK);
+	// 	}
+
+	// 	return new ResponseEntity<>(creditos, HttpStatus.OK);
+	// }
+
+	
 	@GetMapping("/cobros/{id}/cobradores")
 	public ResponseEntity<?> getCobrador(@PathVariable("id") int id) {
-
+		
 		Cobrador cobrador = null;
 		Map<String, Object> map = new HashMap<>();
-
+		
 		try {
 			cobrador = cobroService.findById(id).getCobrador();
-
+			
 		} catch (Exception e) {
-
+			
 			map.put("error", "Error obteniendo el cobrador del cobro " + id);
 			return new ResponseEntity<>(map, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
+		
 		return new ResponseEntity<>(cobrador, HttpStatus.OK);
 	}
-
-	@GetMapping("/cobros/{id}/clientes")
-	public ResponseEntity<?> getClientes(@PathVariable("id") int id) {
-
-		List<Cliente> clientes = null;
-		Map<String, Object> map = new HashMap<>();
-
-		try {
-			clientes = cobroService.findById(id).getClientes();
-
-		} catch (Exception e) {
-
-			map.put("error", "Error obteniendo la lista de clientes del cobro " + id);
-			return new ResponseEntity<>(map, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-
-		if (clientes.size() == 0) {
-			map.put("message", "el cobro " + id + " no tiene clientes");
-			return new ResponseEntity<>(map, HttpStatus.OK);
-		}
-
-		return new ResponseEntity<>(clientes, HttpStatus.OK);
-	}
-
+	
+	
 	@GetMapping("/cobros/{id}/liquidaciones")
 	public ResponseEntity<?> getLiquidaciones(@PathVariable("id") int id) {
-
+		
 		List<Liquidacion> liquidaciones = null;
 		Map<String, Object> map = new HashMap<>();
-
+		
 		try {
 			liquidaciones = cobroService.findById(id).getLiquidaciones();
-
+			
 		} catch (Exception e) {
-
+			
 			map.put("error", "Error obteniendo las liquidaciones del cobro " + id);
 			return new ResponseEntity<>(map, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
+		
 		if (liquidaciones.size() == 0) {
 			map.put("message", "El cobro no tiene liquidaciones realizadas aun");
 			return new ResponseEntity<>(map, HttpStatus.OK);
 		}
-
+		
 		return new ResponseEntity<>(liquidaciones, HttpStatus.OK);
 	}
-
+	
 }
+
+// @PostMapping("/cobros/{id}/creditos")
+// public ResponseEntity<?> addCredito(@RequestBody @Valid Credito credito, @PathVariable("id") int id,
+// 		BindingResult br) {
+// 	Map<String, Object> map = new HashMap<>();
+// 	Cliente cliente = null;
+// 	if (br.hasErrors()) {
+// 		List<String> errors = br.getFieldErrors().stream().map(error -> error.getDefaultMessage())
+// 				.collect(Collectors.toList());
+// 		map.put("errors", errors);
+// 		map.put("message", "Error en la validacion del argumento Credito");
+// 		return new ResponseEntity<>(map, HttpStatus.NOT_ACCEPTABLE);
+// 	}
+// 	try {
+// 		cliente = credito.getCliente();
+// 		cliente.setCredito(credito);
+// 		cliente = clienteService.save(cliente);
+// 	} catch (IllegalArgumentException e) {
+// 		map.put("error", "No se pudo asociar el Credito al Cliente");
+// 		return new ResponseEntity<>(map, HttpStatus.INTERNAL_SERVER_ERROR);
+// 	}
+// 	return new ResponseEntity<>(HttpStatus.CREATED);
+// }

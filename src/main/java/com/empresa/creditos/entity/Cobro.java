@@ -98,6 +98,11 @@ public class Cobro implements Serializable {
 		this.clientes.add(c);
 	}
 
+	// public void addCredito(Credito c) {
+	// 	this.creditos.add(c);
+	// 	c.getCliente().setCredito(c);
+	// }
+
 	public void removeCliente(Cliente c) {
 		this.clientes.remove(c);
 		c.setCobro(null);

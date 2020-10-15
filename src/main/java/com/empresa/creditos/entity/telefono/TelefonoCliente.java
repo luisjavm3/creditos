@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -19,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class TelefonoCliente implements Serializable {
 
 	@Id
-	@GeneratedValue()
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
 	@Column(nullable = false)
@@ -28,6 +29,7 @@ public class TelefonoCliente implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cliente_id", nullable = false)
 	@JsonIgnoreProperties(value = { "telefonos", "hibernateLazyInitializer" })
+	// @JsonIgnore
 	private Cliente cliente;
 
 	public int getId() {
@@ -52,6 +54,11 @@ public class TelefonoCliente implements Serializable {
 
 	public void setCliente(Cliente cliente) {
 		this.cliente = cliente;
+	}
+
+	@Override
+	public String toString() {
+		return "{" + " id='" + getId() + "'" + ", numero='" + getNumero() + "'" + "}";
 	}
 
 	private static final long serialVersionUID = 1L;

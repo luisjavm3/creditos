@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -25,6 +26,7 @@ public class Departamento implements Serializable {
 	private int id;
 
 	@NaturalId
+	@Column(nullable = false, unique = true)
 	private String departamento;
 
 	@OneToMany(mappedBy = "departamento", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -68,6 +70,16 @@ public class Departamento implements Serializable {
 	public void setMunicipios(List<Municipio> municipios) {
 		this.municipios = municipios;
 	}
+
+
+	@Override
+	public String toString() {
+		return "{" +
+			" id='" + getId() + "'" +
+			", departamento='" + getDepartamento() + "'" +
+			"}";
+	}
+
 
 	private static final long serialVersionUID = 1L;
 }

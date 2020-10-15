@@ -56,5 +56,10 @@ public class Barrio implements Serializable {
 		this.municipio = municipio;
 	}
 
+	@Override
+	public String toString() {
+		return "{" + " id='" + getId() + "'" + ", barrio='" + getBarrio() + "'" + "}";
+	}
+
 	private static final long serialVersionUID = 1L;
 }
